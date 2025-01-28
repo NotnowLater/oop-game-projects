@@ -43,21 +43,30 @@ public class TileManager {
     }
 
     public void render(Graphics2D g2d){
-        for (int i = 0; i < currentMap.height; i++){
-            for (int j = 0; j < currentMap.width; j++){
-
+//        for (int i = 0; i < currentMap.height; i++){
+//            for (int j = 0; j < currentMap.width; j++){
+//                int tileWorldX = j * gW.RENDER_TILE_SIZE;
+//                int tileWorldY = i * gW.RENDER_TILE_SIZE;
+//                Vector2 screen = gW.util.worldPosToScreenPos(new Vector2(tileWorldX, tileWorldY));
+//
+//                // check if current tile is within the game screen to improve game performance
+//                if ((screen.x >= -gW.RENDER_TILE_SIZE && screen.x <= gW.SCREEN_WIDTH &&
+//                        screen.y >= -gW.RENDER_TILE_SIZE && screen.y <= gW.SCREEN_HEIGHT)){
+//                    g2d.drawImage(tileSet[currentMap.tileData[i][j]].tileImage, screen.x, screen.y, gW.RENDER_TILE_SIZE, gW.RENDER_TILE_SIZE, null);
+//                }
+//            }
+//        }
+        Vector2 start = new Vector2(Math.abs(gW.viewportPosition.x / gW.RENDER_TILE_SIZE), Math.abs(gW.viewportPosition.y / gW.RENDER_TILE_SIZE));
+        for (int i = start.y; i < start.y + gW.SCREEN_TILE_HEIGHT + 1; i++){
+            for (int j = start.x; j < start.x + gW.SCREEN_TILE_WIDTH + 1; j++){
                 int tileWorldX = j * gW.RENDER_TILE_SIZE;
                 int tileWorldY = i * gW.RENDER_TILE_SIZE;
-                Vector2 screen = gW.util.worldPosToScreenPos(new Vector2(tileWorldX, tileWorldY));
-
-                // check if current tile is within the game screen to improve game performance
-                if ((screen.x >= -gW.RENDER_TILE_SIZE && screen.x <= gW.SCREEN_WIDTH &&
-                        screen.y >= -gW.RENDER_TILE_SIZE && screen.y <= gW.SCREEN_HEIGHT)){
+                if ((j >= 0 && j < currentMap.width) && (i >= 0 && i < currentMap.height)){
+                    Vector2 screen = gW.util.worldPosToScreenPos(new Vector2(tileWorldX, tileWorldY));
                     g2d.drawImage(tileSet[currentMap.tileData[i][j]].tileImage, screen.x, screen.y, gW.RENDER_TILE_SIZE, gW.RENDER_TILE_SIZE, null);
                 }
             }
         }
-
         // debug
         for (int i = 0; i < debugX.size(); i++){
             Vector2 sPos = gW.util.worldPosToScreenPos(new Vector2(debugX.get(i), debugY.get(i)));
