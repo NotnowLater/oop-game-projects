@@ -14,6 +14,8 @@ public class BlueEnemy extends Enemy{
     public int spriteWalkId = 0;
     public int lastSpriteWalkId = 0;
 
+    public boolean movingLeft = false;
+
     public Vector2 notActiveWorldPos;
     public Vector2 notActiveHitBoxWorldPos;
 
@@ -37,10 +39,15 @@ public class BlueEnemy extends Enemy{
             isActive = false;
         }
         if (!isDead && isActive){
-            if (!gW.tileManager.isTileBlocking(hitBox.x - 2, hitBox.y + hitBox.height + collisionCheckTileOffset) && facing == 0){
+            if (movingLeft && (!gW.tileManager.isTileBlocking(hitBox.x - 2, hitBox.y + hitBox.height + collisionCheckTileOffset) || gW.tileManager.isTileBlocking(hitBox.x - collisionCheckTileOffset, hitBox.y))){
+                movingLeft = false;
+            } else if (!movingLeft && (!gW.tileManager.isTileBlocking(hitBox.x + hitBox.width + 2, hitBox.y + hitBox.height + collisionCheckTileOffset) || gW.tileManager.isTileBlocking(hitBox.x + hitBox.width + collisionCheckTileOffset, hitBox.y))){
+                movingLeft = true;
+            }
+            if (!movingLeft){
                 velocity.x = 4;
                 facing = 1;
-            } else if (facing == 1 && !gW.tileManager.isTileBlocking(hitBox.x + hitBox.width + 2, hitBox.y + hitBox.height + collisionCheckTileOffset)){
+            } else {
                 velocity.x = -4;
                 facing = 0;
             }
@@ -52,6 +59,7 @@ public class BlueEnemy extends Enemy{
             screenPosition = gW.util.worldPosToScreenPos(worldPosition);
             checkCollisionWithPlayer();
         } else {
+            movingLeft = gW.player.worldPosition.x <= worldPosition.x;
             worldPosition = new Vector2(notActiveWorldPos);
             hitBox.x = notActiveHitBoxWorldPos.x;
             hitBox.y = notActiveHitBoxWorldPos.y;

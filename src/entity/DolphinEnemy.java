@@ -52,9 +52,9 @@ public class DolphinEnemy extends Enemy{
             inAttackRange = worldPosition.distanceTo(gW.player.worldPosition) <= 456;
             if (!inAttackRange){
                 shooting = false;
-                if (!gW.tileManager.isTileBlocking(hitBox.x - 2, hitBox.y + hitBox.height + collisionCheckTileOffset) && movingLeft){
+                if (movingLeft && (!gW.tileManager.isTileBlocking(hitBox.x - 2, hitBox.y + hitBox.height + collisionCheckTileOffset) || gW.tileManager.isTileBlocking(hitBox.x - collisionCheckTileOffset, hitBox.y))){
                     movingLeft = false;
-                } else if (!movingLeft && !gW.tileManager.isTileBlocking(hitBox.x + hitBox.width + 2, hitBox.y + hitBox.height + collisionCheckTileOffset)){
+                } else if (!movingLeft && (!gW.tileManager.isTileBlocking(hitBox.x + hitBox.width + 2, hitBox.y + hitBox.height + collisionCheckTileOffset) || gW.tileManager.isTileBlocking(hitBox.x + hitBox.width + collisionCheckTileOffset, hitBox.y))){
                     movingLeft = true;
                 }
                 if (!movingLeft){
@@ -95,6 +95,7 @@ public class DolphinEnemy extends Enemy{
             // respawn
             invincible = false;
             invincibilityCheck();
+            movingLeft = gW.player.worldPosition.x <= worldPosition.x;
             worldPosition = new Vector2(notActiveWorldPos);
             hitBox.x = notActiveHitBoxWorldPos.x;
             hitBox.y = notActiveHitBoxWorldPos.y;
