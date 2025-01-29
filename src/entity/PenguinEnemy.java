@@ -119,6 +119,7 @@ public class PenguinEnemy extends Enemy{
             checkCollisionWithPlayer();
         } else {
             // respawn
+            changeStateTo(0);
             invincible = false;
             invincibilityCheck();
             movingLeft = gW.player.worldPosition.x <= worldPosition.x;
