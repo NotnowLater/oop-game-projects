@@ -31,6 +31,8 @@ public class PenguinEnemy extends Enemy{
     public boolean invincible = false;
     public int hp = 3;
 
+    public int currentState = 0;
+
     public PenguinEnemy(GameWindow gW, Vector2 worldPos, String spritePath){
         super(gW, worldPos);
         loadSprites(spritePath);
@@ -52,7 +54,8 @@ public class PenguinEnemy extends Enemy{
         }
         if (!isDead && isActive){
             inAttackRange = worldPosition.distanceTo(gW.player.worldPosition) <= 456;
-            if (!inAttackRange && canJump){
+            // walking state
+            if (currentState == 0){
                 canJump = false;
                 if (movingLeft && (!gW.tileManager.isTileBlocking(hitBox.x - 2, hitBox.y + hitBox.height + collisionCheckTileOffset) || gW.tileManager.isTileBlocking(hitBox.x - collisionCheckTileOffset, hitBox.y))){
                     movingLeft = false;
@@ -67,37 +70,47 @@ public class PenguinEnemy extends Enemy{
                     facing = 0;
                 }
                 if (!isOnGround()){
-                    velocity.y = 10;
+                    velocity.y += 2;
+                    if (velocity.y > 10){
+                        velocity.y = 10;
+                    }
                 }
-
-            } else {
-                System.out.println(jumping + " " + canJump);
-                // InPlayerRange
-                if (!canJump){
+                if (inAttackRange){
+                    changeStateTo(1);
+                    if (gW.player.worldPosition.x <= worldPosition.x){
+                        facing = 0;
+                        movingLeft = true;
+                    } else {
+                        facing = 1;
+                        movingLeft = false;
+                    }
+                    spriteWalkId = 0;
+                    spriteWalkFrame =0;
                     velocity.x = 0;
-                    velocity.y = 10;
-                } else if (jumping){
-                    velocity.y = -4 ;
-                    velocity.x = 2 * jumpToPlayerFacing;
-                } else {
+                }
+            }
+            // jump state
+            else if(currentState == 2){
+                if (velocity.y <= 10){
                     velocity.y += 1;
-                    velocity.y = Math.clamp(velocity.y, -10, 10);
-                    velocity.x = 2 * jumpToPlayerFacing;
+                    if (movingLeft){
+                        velocity.x = -14;
+                    } else {
+                        velocity.x = 14;
+                    }
                 }
-                if (gW.player.worldPosition.x > worldPosition.x && !canJump){
-                    facing = 1;
-                    movingLeft = false;
-                } else if (!canJump){
-                    facing = 0;
-                    movingLeft = true;
+                if (velocity.y > 0){
+                    if (movingLeft){
+                        velocity.x = -8;
+                    } else {
+                        velocity.x = 8;
+                    }
+                    if (isOnGround()){
+                        changeStateTo(0);
+                        spriteWalkId = 0;
+                        velocity.x = 0;
+                    }
                 }
-                if (jumpFrame >= MAX_SHOOT_FRAME && !canJump){
-                    jumpFrame = 0;
-                    canJump = true;
-                } else {
-                    jumpFrame++;
-                }
-
             }
             invincibilityCheck();
             applyVelocity();
@@ -119,7 +132,7 @@ public class PenguinEnemy extends Enemy{
     }
 
     public void animateSprite(){
-        if (!inAttackRange) {
+        if (currentState == 0) {
             if (spriteWalkFrame >= 8) {
                 spriteWalkFrame = 0;
                 if (spriteWalkId == 0) {
@@ -136,26 +149,24 @@ public class PenguinEnemy extends Enemy{
             } else {
                 spriteWalkFrame++;
             }
-        } else {
-            if (!canJump){
-                spriteWalkId = 0;
-            } else {
-                if (spriteWalkFrame >= 24){
-                    spriteWalkFrame = 0;
+        } else if (currentState == 1){
+            if (spriteWalkFrame >= 8){
+                spriteWalkFrame = 0;
+                spriteWalkId++;
+                if (spriteWalkId == 3){
+                    velocity.y = -12;
                     spriteWalkId++;
-                    if (spriteWalkId == 3){
-                        setUpJumpToPlayer(false);
-                    } else if (spriteWalkId == 4){
-                        setUpJumpToPlayer(true);
-                    } else if (spriteWalkId == 6){
-                        canJump = false;
-                        jumpFrame = 0;
-                        spriteWalkId = 0;
-                    }
-                } else {
-                    spriteWalkFrame++;
+                    changeStateTo(2);
                 }
+            } else {
+                spriteWalkFrame++;
             }
+        }
+    }
+
+    public void changeStateTo(int newState){
+        if (newState != currentState){
+            currentState = newState;
         }
     }
 
@@ -202,7 +213,7 @@ public class PenguinEnemy extends Enemy{
     public void render(Graphics2D g2d){
         if (!isDead && isActive){
             if (invincibilityFrame % 2 == 0) {
-                if (!canJump){
+                if (currentState == 0){
                     g2d.drawImage(sprites[facing][spriteWalkId], screenPosition.x, screenPosition.y, 24 * gW.TILE_SCALE, 24 * gW.TILE_SCALE, null);
                 } else {
                     g2d.drawImage(sprites[facing + 2][Math.clamp(spriteWalkId, 0, 4)], screenPosition.x, screenPosition.y, 24 * gW.TILE_SCALE, 24 * gW.TILE_SCALE, null);
