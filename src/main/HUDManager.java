@@ -19,7 +19,7 @@ public class HUDManager {
     }
 
     public void render(Graphics2D g2d){
-        renderHpBar(gW.player.hp, g2d);
+        renderHpBar(gW.player.getHp(), g2d);
     }
 
     public void renderHpBar(int Hp, Graphics2D g2d){

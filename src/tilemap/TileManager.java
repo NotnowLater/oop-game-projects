@@ -11,14 +11,14 @@ import java.util.List;
 
 public class TileManager {
 
-    public GameWindow gW;
+    private GameWindow gW;
 
-    public Tile[] tileSet = new Tile[1060];
+    private Tile[] tileSet = new Tile[1060];
 
-    public TileMap currentMap;
+    private TileMap currentMap;
 
-    public List<Integer> debugX = new ArrayList<Integer>();
-    public List<Integer> debugY = new ArrayList<Integer>();
+    private List<Integer> debugX = new ArrayList<Integer>();
+    private List<Integer> debugY = new ArrayList<Integer>();
 
     public TileManager(GameWindow gW){
         this.gW = gW;
@@ -56,14 +56,14 @@ public class TileManager {
 //                }
 //            }
 //        }
-        Vector2 start = new Vector2(Math.abs(gW.viewportPosition.x / gW.RENDER_TILE_SIZE), Math.abs(gW.viewportPosition.y / gW.RENDER_TILE_SIZE));
-        for (int i = start.y; i < start.y + gW.SCREEN_TILE_HEIGHT + 1; i++){
-            for (int j = start.x; j < start.x + gW.SCREEN_TILE_WIDTH + 1; j++){
+        Vector2 start = new Vector2(Math.abs(gW.viewportPosition.getX() / gW.RENDER_TILE_SIZE), Math.abs(gW.viewportPosition.getY() / gW.RENDER_TILE_SIZE));
+        for (int i = start.getY(); i < start.getY() + gW.SCREEN_TILE_HEIGHT + 1; i++){
+            for (int j = start.getX(); j < start.getX() + gW.SCREEN_TILE_WIDTH + 1; j++){
                 int tileWorldX = j * gW.RENDER_TILE_SIZE;
                 int tileWorldY = i * gW.RENDER_TILE_SIZE;
-                if ((j >= 0 && j < currentMap.width) && (i >= 0 && i < currentMap.height)){
+                if ((j >= 0 && j < currentMap.getWidth()) && (i >= 0 && i < currentMap.getHeight())){
                     Vector2 screen = gW.util.worldPosToScreenPos(new Vector2(tileWorldX, tileWorldY));
-                    g2d.drawImage(tileSet[currentMap.tileData[i][j]].tileImage, screen.x, screen.y, gW.RENDER_TILE_SIZE, gW.RENDER_TILE_SIZE, null);
+                    g2d.drawImage(tileSet[currentMap.getTileData()[i][j]].tileImage, screen.getX(), screen.getY(), gW.RENDER_TILE_SIZE, gW.RENDER_TILE_SIZE, null);
                 }
             }
         }
@@ -71,7 +71,7 @@ public class TileManager {
         for (int i = 0; i < debugX.size(); i++){
             Vector2 sPos = gW.util.worldPosToScreenPos(new Vector2(debugX.get(i), debugY.get(i)));
             g2d.setColor(Color.green);
-            g2d.drawRect(sPos.x, sPos.y, gW.RENDER_TILE_SIZE, gW.RENDER_TILE_SIZE);
+            g2d.drawRect(sPos.getX(), sPos.getY(), gW.RENDER_TILE_SIZE, gW.RENDER_TILE_SIZE);
         }
         debugX.clear();
         debugY.clear();
@@ -94,7 +94,7 @@ public class TileManager {
         debugX.add(tileX * gW.RENDER_TILE_SIZE);
         debugY.add(tileY * gW.RENDER_TILE_SIZE);
 
-        int tile = currentMap.tileData[tileY][tileX];
+        int tile = currentMap.getTileData()[tileY][tileX];
 //        return tile != 9 && tile != 10;
         return tile < 200 || (tile >= 840 && tile < 1020);
     }

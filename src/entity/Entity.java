@@ -7,14 +7,14 @@ import java.awt.*;
 
 public abstract class Entity {
 
-    public Vector2 worldPosition;
-    public Vector2 velocity;
-    public GameWindow gW;
+    private Vector2 worldPosition;
+    private Vector2 velocity;
+    private GameWindow gW;
 
     public Entity(GameWindow gW, Vector2 worldPosition){
-        this.gW = gW;
-        this.worldPosition = worldPosition;
-        this.velocity = new Vector2(0,0);
+        this.setgW(gW);
+        this.setWorldPosition(worldPosition);
+        this.setVelocity(new Vector2(0,0));
     }
 
     public void process(){
@@ -30,4 +30,27 @@ public abstract class Entity {
     }
 
 
+    public Vector2 getWorldPosition() {
+        return worldPosition;
+    }
+
+    public void setWorldPosition(Vector2 worldPosition) {
+        this.worldPosition = worldPosition;
+    }
+
+    public Vector2 getVelocity() {
+        return velocity;
+    }
+
+    public void setVelocity(Vector2 velocity) {
+        this.velocity = velocity;
+    }
+
+    public GameWindow getgW() {
+        return gW;
+    }
+
+    public void setgW(GameWindow gW) {
+        this.gW = gW;
+    }
 }

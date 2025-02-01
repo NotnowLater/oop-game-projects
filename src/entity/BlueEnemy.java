@@ -8,97 +8,97 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class BlueEnemy extends Enemy{
-    public BufferedImage[][] sprites;
+    BufferedImage[][] sprites;
 
-    public int spriteWalkFrame = 0;
-    public int spriteWalkId = 0;
-    public int lastSpriteWalkId = 0;
+    private int spriteWalkFrame = 0;
+    private int spriteWalkId = 0;
+    private int lastSpriteWalkId = 0;
 
-    public boolean movingLeft = false;
+    private boolean movingLeft = false;
 
-    public Vector2 notActiveWorldPos;
-    public Vector2 notActiveHitBoxWorldPos;
+    private Vector2 notActiveWorldPos;
+    private Vector2 notActiveHitBoxWorldPos;
 
     public BlueEnemy(GameWindow gW, Vector2 worldPos, String spritePath){
         super(gW, worldPos);
         loadSprites(spritePath);
-        notActiveWorldPos = new Vector2(worldPos);
-        screenPosition = gW.util.worldPosToScreenPos(worldPos);
-        hitBox = new Rectangle(worldPos.x + 12, worldPos.y + 18,24 * gW.TILE_SCALE - 8 * gW.TILE_SCALE, 24 * gW.TILE_SCALE - 7 * gW.TILE_SCALE );
-        notActiveHitBoxWorldPos = new Vector2(hitBox.x, hitBox.y);
-        isActive = false;
-        isDead = false;
+        setNotActiveWorldPos(new Vector2(worldPos));
+        setScreenPosition(gW.util.worldPosToScreenPos(worldPos));
+        setHitBox(new Rectangle(worldPos.getX() + 12, worldPos.getY() + 18,24 * gW.TILE_SCALE - 8 * gW.TILE_SCALE, 24 * gW.TILE_SCALE - 7 * gW.TILE_SCALE ));
+        setNotActiveHitBoxWorldPos(new Vector2(getHitBox().x, getHitBox().y));
+        setActive(false);
+        setDead(false);
     }
 
     @Override
     public void process(){
-        if (gW.util.isRectOnScreen(hitBox) && !isActive && !isDead){
-            isActive = true;
-        } else if (!gW.util.isRectOnScreen(hitBox) && isDead){
-            isDead = false;
-            isActive = false;
+        if (getgW().util.isRectOnScreen(getHitBox()) && !isActive() && !isDead()){
+            setActive(true);
+        } else if (!getgW().util.isRectOnScreen(getHitBox()) && isDead()){
+            setDead(false);
+            setActive(false);
         }
-        if (!isDead && isActive){
-            if (movingLeft && (!gW.tileManager.isTileBlocking(hitBox.x - 2, hitBox.y + hitBox.height + collisionCheckTileOffset) || gW.tileManager.isTileBlocking(hitBox.x - collisionCheckTileOffset, hitBox.y))){
-                movingLeft = false;
-            } else if (!movingLeft && (!gW.tileManager.isTileBlocking(hitBox.x + hitBox.width + 2, hitBox.y + hitBox.height + collisionCheckTileOffset) || gW.tileManager.isTileBlocking(hitBox.x + hitBox.width + collisionCheckTileOffset, hitBox.y))){
-                movingLeft = true;
+        if (!isDead() && isActive()){
+            if (isMovingLeft() && (!getgW().tileManager.isTileBlocking(getHitBox().x - 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset()) || getgW().tileManager.isTileBlocking(getHitBox().x - getCollisionCheckTileOffset(), getHitBox().y))){
+                setMovingLeft(false);
+            } else if (!isMovingLeft() && (!getgW().tileManager.isTileBlocking(getHitBox().x + getHitBox().width + 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset()) || getgW().tileManager.isTileBlocking(getHitBox().x + getHitBox().width + getCollisionCheckTileOffset(), getHitBox().y))){
+                setMovingLeft(true);
             }
-            if (!movingLeft){
-                velocity.x = 4;
-                facing = 1;
+            if (!isMovingLeft()){
+                getVelocity().setX(4);
+                setFacing(1);
             } else {
-                velocity.x = -4;
-                facing = 0;
+                getVelocity().setX(-4);
+                setFacing(0);
             }
             if (!isOnGround()){
-                velocity.y = 10;
+                getVelocity().setY(10);
             }
             applyVelocity();
             animateSprite();
-            screenPosition = gW.util.worldPosToScreenPos(worldPosition);
+            setScreenPosition(getgW().util.worldPosToScreenPos(getWorldPosition()));
             checkCollisionWithPlayer();
         } else {
-            movingLeft = gW.player.worldPosition.x <= worldPosition.x;
-            worldPosition = new Vector2(notActiveWorldPos);
-            hitBox.x = notActiveHitBoxWorldPos.x;
-            hitBox.y = notActiveHitBoxWorldPos.y;
-            velocity = new Vector2(0, 0);
-            screenPosition = gW.util.worldPosToScreenPos(worldPosition);
+            setMovingLeft(getgW().player.getWorldPosition().getX() <= getWorldPosition().getX());
+            setWorldPosition(new Vector2(getNotActiveWorldPos()));
+            getHitBox().x = getNotActiveHitBoxWorldPos().getX();
+            getHitBox().y = getNotActiveHitBoxWorldPos().getY();
+            setVelocity(new Vector2(0, 0));
+            setScreenPosition(getgW().util.worldPosToScreenPos(getWorldPosition()));
         }
     }
 
     @Override
     public void render(Graphics2D g2d) {
-        if (!isDead && isActive){
-            g2d.drawImage(sprites[facing][spriteWalkId], screenPosition.x, screenPosition.y, 24 * gW.TILE_SCALE, 24 * gW.TILE_SCALE, null);
-            gW.util.drawDebugRect(g2d, hitBox);
+        if (!isDead() && isActive()){
+            g2d.drawImage(sprites[getFacing()][getSpriteWalkId()], getScreenPosition().getX(), getScreenPosition().getY(), 24 * getgW().TILE_SCALE, 24 * getgW().TILE_SCALE, null);
+            getgW().util.drawDebugRect(g2d, getHitBox());
         }
     }
 
     public void animateSprite(){
-        if (spriteWalkFrame >= 8){
-            spriteWalkFrame = 0;
-            if (spriteWalkId == 0){
-                if (lastSpriteWalkId == 2){
-                    spriteWalkId = 1;
-                    lastSpriteWalkId = spriteWalkId;
+        if (getSpriteWalkFrame() >= 8){
+            setSpriteWalkFrame(0);
+            if (getSpriteWalkId() == 0){
+                if (getLastSpriteWalkId() == 2){
+                    setSpriteWalkId(1);
+                    setLastSpriteWalkId(getSpriteWalkId());
                 } else {
-                    spriteWalkId = 2;
-                    lastSpriteWalkId = spriteWalkId;
+                    setSpriteWalkId(2);
+                    setLastSpriteWalkId(getSpriteWalkId());
                 }
             } else {
-                spriteWalkId =0;
+                setSpriteWalkId(0);
             }
         } else {
-            spriteWalkFrame ++;
+            setSpriteWalkFrame(getSpriteWalkFrame() + 1);
         }
     }
 
     @Override
     public void onHit(Vector2 hitPos){
-        isDead = true;
-        gW.effects.add(gW.enemyFactory.getEnemy(-1, new Vector2(worldPosition)));
+        setDead(true);
+        getgW().effects.add(getgW().enemyFactory.getEnemy(-1, new Vector2(getWorldPosition())));
     }
 
     @Override
@@ -114,5 +114,53 @@ public class BlueEnemy extends Enemy{
         } catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public int getSpriteWalkFrame() {
+        return spriteWalkFrame;
+    }
+
+    public void setSpriteWalkFrame(int spriteWalkFrame) {
+        this.spriteWalkFrame = spriteWalkFrame;
+    }
+
+    public int getSpriteWalkId() {
+        return spriteWalkId;
+    }
+
+    public void setSpriteWalkId(int spriteWalkId) {
+        this.spriteWalkId = spriteWalkId;
+    }
+
+    public int getLastSpriteWalkId() {
+        return lastSpriteWalkId;
+    }
+
+    public void setLastSpriteWalkId(int lastSpriteWalkId) {
+        this.lastSpriteWalkId = lastSpriteWalkId;
+    }
+
+    public boolean isMovingLeft() {
+        return movingLeft;
+    }
+
+    public void setMovingLeft(boolean movingLeft) {
+        this.movingLeft = movingLeft;
+    }
+
+    public Vector2 getNotActiveWorldPos() {
+        return notActiveWorldPos;
+    }
+
+    public void setNotActiveWorldPos(Vector2 notActiveWorldPos) {
+        this.notActiveWorldPos = notActiveWorldPos;
+    }
+
+    public Vector2 getNotActiveHitBoxWorldPos() {
+        return notActiveHitBoxWorldPos;
+    }
+
+    public void setNotActiveHitBoxWorldPos(Vector2 notActiveHitBoxWorldPos) {
+        this.notActiveHitBoxWorldPos = notActiveHitBoxWorldPos;
     }
 }

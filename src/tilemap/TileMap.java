@@ -1,6 +1,5 @@
 package tilemap;
 
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -8,21 +7,22 @@ import java.util.Arrays;
 
 public class TileMap {
 
-    public int[][] tileData;
-    public int width, height;
+    private int[][] tileData;
+    private int width;
+    private int height;
 
     public TileMap(int width, int height, String dataPath){
         try {
-            this.width = width;
-            this.height = height;
-            tileData = new int[height][width];
+            this.setWidth(width);
+            this.setHeight(height);
+            setTileData(new int[height][width]);
             InputStream is = getClass().getClassLoader().getResourceAsStream(dataPath);
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             String line;
             int lineCount = 0;
             while ((line = br.readLine()) != null){
                 int[] toAdd = Arrays.stream(line.split(",")).mapToInt(Integer::parseInt).toArray();
-                tileData[lineCount] = toAdd.clone();
+                getTileData()[lineCount] = toAdd.clone();
                 lineCount++;
             }
             br.close();
@@ -32,4 +32,27 @@ public class TileMap {
         }
     }
 
+    public int[][] getTileData() {
+        return tileData;
+    }
+
+    public void setTileData(int[][] tileData) {
+        this.tileData = tileData;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
 }

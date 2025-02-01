@@ -12,45 +12,45 @@ public class Player extends Entity{
 
     BufferedImage[][] sprites;
 
-    public int collisionCheckTileOffset = 4;
+    final int collisionCheckTileOffset = 4;
 
 //    public Vector2 screenPosition;
 
-    public Rectangle hitBox;
+    private Rectangle hitBox;
 
-    public int facing = 1;  // 0 - left 1 - right
-    public int spriteId = 0;
-    public int spriteAnimateFrame = 0;
-    public int moveSpriteAnimId = 0;
-    public int lastMoveSpriteAnimId = 0;
+    private int facing = 1;  // 0 - left 1 - right
+    private int spriteId = 0;
+    private int spriteAnimateFrame = 0;
+    private int moveSpriteAnimId = 0;
+    private int lastMoveSpriteAnimId = 0;
 
 //    public Vector2 velocity = new Vector2(0, 0);
-    public boolean jumped = false;
+    private boolean jumped = false;
 
-    public final int MAX_JUMP_FRAME = 4;
-    public int jumpFrame = 0;
-    public int moveDelayFrame = 0;
+    private final int MAX_JUMP_FRAME = 4;
+    private int jumpFrame = 0;
+    private int moveDelayFrame = 0;
 
-    public Vector2 playerScreenPosition;
+    private Vector2 playerScreenPosition;
 
-    public int shootTimer = 0;
-    public int shootMaxTimer = 1;
-    public int shootAnim = 0;
-    public int shootAnimChangeBackFrame = 0;
+    private int shootTimer = 0;
+    private int shootMaxTimer = 1;
+    private int shootAnim = 0;
+    private int shootAnimChangeBackFrame = 0;
 
-    public final int MAX_INVINCIBILITY_FRAME = 36;
-    public int knockBackDir = 0;
-    public int invincibilityFrame = 0;
-    public boolean invincible = false;
-    public int hp = 7;
+    private final int MAX_INVINCIBILITY_FRAME = 36;
+    private int knockBackDir = 0;
+    private int invincibilityFrame = 0;
+    private boolean invincible = false;
+    private int hp = 7;
 
     public Player(GameWindow gW, Vector2 worldPosition){
         super(gW, worldPosition);
-        velocity = new Vector2(0,0);
+        setVelocity(new Vector2(0,0));
         // center the player on the screen
-        playerScreenPosition = gW.util.worldPosToScreenPos(worldPosition);
-        this.hitBox = new Rectangle(worldPosition.x + 12, worldPosition.y + 6, 24 * 3 - 7 * 3, 24 * 3 - 3 * 3);
-        gW.viewportPosition = new Vector2((gW.SCREEN_WIDTH / 2) - worldPosition.x, (gW.SCREEN_HEIGHT / 2)  - worldPosition.y);
+        setPlayerScreenPosition(gW.util.worldPosToScreenPos(worldPosition));
+        this.setHitBox(new Rectangle(worldPosition.getX() + 12, worldPosition.getY() + 6, 24 * 3 - 7 * 3, 24 * 3 - 3 * 3));
+        gW.viewportPosition = new Vector2((gW.SCREEN_WIDTH / 2) - worldPosition.getX(), (gW.SCREEN_HEIGHT / 2)  - worldPosition.getY());
         loadSprites();
     }
 
@@ -58,105 +58,105 @@ public class Player extends Entity{
     public void process(){
 //        System.out.println(worldPosition);
         // Jump
-        if (gW.keyInputHandler.confirm && !(invincible && invincibilityFrame < 8)){
-            if (!jumped){
-                velocity.y = -8;
-                jumped = true;
-                jumpFrame = 0;
-            } else if (jumpFrame <= MAX_JUMP_FRAME){
-                velocity.y += -3;
-                jumpFrame++;
+        if (getgW().keyInputHandler.confirm && !(isInvincible() && getInvincibilityFrame() < 8)){
+            if (!isJumped()){
+                getVelocity().setY(-8);
+                setJumped(true);
+                setJumpFrame(0);
+            } else if (getJumpFrame() <= getMAX_JUMP_FRAME()){
+                getVelocity().setY(getVelocity().getY() + -3);
+                setJumpFrame(getJumpFrame() + 1);
             }
         }
         // Movements
-        if (gW.keyInputHandler.rightPressed && !(invincible && invincibilityFrame < 8)){
-            if (!jumped){
-                if (moveDelayFrame == 0){
-                    velocity.x = 1;
-                    moveDelayFrame++;
-                } else if(moveDelayFrame < 8){
-                    moveDelayFrame++;
-                    velocity.x = 0;
-                    spriteId = 1;
+        if (getgW().keyInputHandler.rightPressed && !(isInvincible() && getInvincibilityFrame() < 8)){
+            if (!isJumped()){
+                if (getMoveDelayFrame() == 0){
+                    getVelocity().setX(1);
+                    setMoveDelayFrame(getMoveDelayFrame() + 1);
+                } else if(getMoveDelayFrame() < 8){
+                    setMoveDelayFrame(getMoveDelayFrame() + 1);
+                    getVelocity().setX(0);
+                    setSpriteId(1);
                 } else {
-                    velocity.x = 6;
-                    spriteId = 2;
-                    spriteAnimateFrame++;
+                    getVelocity().setX(6);
+                    setSpriteId(2);
+                    setSpriteAnimateFrame(getSpriteAnimateFrame() + 1);
                 }
             } else {
-                velocity.x = 4;
+                getVelocity().setX(4);
             }
-            facing = 1;
+            setFacing(1);
         }
-        else if (gW.keyInputHandler.leftPressed && !(invincible && invincibilityFrame < 8)){
-            if (!jumped){
-                if (moveDelayFrame == 0){
-                    velocity.x = -1;
-                    moveDelayFrame++;
-                } else if(moveDelayFrame < 8){
-                    moveDelayFrame++;
-                    velocity.x = 0;
-                    spriteId = 1;
+        else if (getgW().keyInputHandler.leftPressed && !(isInvincible() && getInvincibilityFrame() < 8)){
+            if (!isJumped()){
+                if (getMoveDelayFrame() == 0){
+                    getVelocity().setX(-1);
+                    setMoveDelayFrame(getMoveDelayFrame() + 1);
+                } else if(getMoveDelayFrame() < 8){
+                    setMoveDelayFrame(getMoveDelayFrame() + 1);
+                    getVelocity().setX(0);
+                    setSpriteId(1);
                 } else {
-                    velocity.x = -6;
-                    spriteId = 2;
-                    spriteAnimateFrame++;
+                    getVelocity().setX(-6);
+                    setSpriteId(2);
+                    setSpriteAnimateFrame(getSpriteAnimateFrame() + 1);
                 }
             } else {
-                velocity.x = -4;
+                getVelocity().setX(-4);
             }
-            facing = 0;
+            setFacing(0);
         }
         // knockBack
-        else if (invincible && invincibilityFrame < 8){
-            if (knockBackDir == 0){
-                velocity.x = 8;
+        else if (isInvincible() && getInvincibilityFrame() < 8){
+            if (getKnockBackDir() == 0){
+                getVelocity().setX(8);
             } else {
-                velocity.x = -8;
+                getVelocity().setX(-8);
             }
-            moveDelayFrame = 0;
-            if (!jumped)
-                spriteId = 0;
-            moveSpriteAnimId = 0;
+            setMoveDelayFrame(0);
+            if (!isJumped())
+                setSpriteId(0);
+            setMoveSpriteAnimId(0);
         } else {
-            velocity.x = 0;
-            moveDelayFrame = 0;
-            if (!jumped)
-                spriteId = 0;
-            moveSpriteAnimId = 0;
+            getVelocity().setX(0);
+            setMoveDelayFrame(0);
+            if (!isJumped())
+                setSpriteId(0);
+            setMoveSpriteAnimId(0);
         }
         // Ground Check and apply gravity
-        if (!jumped){
+        if (!isJumped()){
             if (!isOnGround()){
-                jumped = true;
+                setJumped(true);
             }
         } else {
-            if (isOnGround() && velocity.y > 0){
-                jumped = false;
-                velocity.y = 0;
+            if (isOnGround() && getVelocity().getY() > 0){
+                setJumped(false);
+                getVelocity().setY(0);
             }
             else
-                velocity.y += 1;
+                getVelocity().setY(getVelocity().getY() + 1);
         }
         // this should be in animateSprite but the game won't work if this is in animateSprite
-        if (jumped || !isOnGround()){
-            spriteId = 5;
+        if (isJumped() || !isOnGround()){
+            setSpriteId(5);
         }
 
 //        if (gW.keyInputHandler.cancel){
 //            shoot();
 //        }
 
-        if (shootTimer < shootMaxTimer){
-            shootTimer++;
+        if (getShootTimer() < getShootMaxTimer()){
+            setShootTimer(getShootTimer() + 1);
         }
 
         invincibilityCheck();
         applyVelocity();
         animateSprite();
-        gW.viewportPosition = new Vector2((gW.SCREEN_WIDTH / 2) - worldPosition.x, (gW.SCREEN_HEIGHT / 2)  - worldPosition.y);
+        getgW().viewportPosition = new Vector2((getgW().SCREEN_WIDTH / 2) - getWorldPosition().getX(), (getgW().SCREEN_HEIGHT / 2)  - getWorldPosition().getY());
 //        gW.screenPosition = new Vector2((gW.SCREEN_WIDTH / 2) - worldPosition.x, gW.screenPosition.y);
-        playerScreenPosition = gW.util.worldPosToScreenPos(worldPosition);
+        setPlayerScreenPosition(getgW().util.worldPosToScreenPos(getWorldPosition()));
 //        System.out.println(moveSpriteAnimId);
 //        System.out.println(velocity.x + " " + velocity.y);
 //        System.out.println(((hitBox.y + hitBox.height + velocity.y + 2) / gW.RENDER_TILE_SIZE) * gW.RENDER_TILE_SIZE - (hitBox.y + hitBox.height));
@@ -166,36 +166,36 @@ public class Player extends Entity{
         // apply x
         // check if the player will overlap the any-tile with the current velocity, modify the velocity so that the player won't
         // overlap and get stuck inside a tile
-        if (!gW.tileManager.checkRectNotIntersectAnyTile(hitBox.x + velocity.x, hitBox.y, hitBox.width, hitBox.height)) {
+        if (!getgW().tileManager.checkRectNotIntersectAnyTile(getHitBox().x + getVelocity().getX(), getHitBox().y, getHitBox().width, getHitBox().height)) {
             int tileSnapPosX = 0;
-            if (velocity.x > 0) {
-                tileSnapPosX = ((hitBox.x + hitBox.width + velocity.x + 2) / gW.RENDER_TILE_SIZE) * gW.RENDER_TILE_SIZE;
-                velocity.x = ((hitBox.x + hitBox.width + 1) - tileSnapPosX) * -1;
+            if (getVelocity().getX() > 0) {
+                tileSnapPosX = ((getHitBox().x + getHitBox().width + getVelocity().getX() + 2) / getgW().RENDER_TILE_SIZE) * getgW().RENDER_TILE_SIZE;
+                getVelocity().setX(((getHitBox().x + getHitBox().width + 1) - tileSnapPosX) * -1);
             } else {
-                tileSnapPosX = (((hitBox.x + velocity.x - 2) / gW.RENDER_TILE_SIZE) * gW.RENDER_TILE_SIZE) + gW.RENDER_TILE_SIZE;
-                velocity.x = ((hitBox.x - 1) - tileSnapPosX) * -1;
+                tileSnapPosX = (((getHitBox().x + getVelocity().getX() - 2) / getgW().RENDER_TILE_SIZE) * getgW().RENDER_TILE_SIZE) + getgW().RENDER_TILE_SIZE;
+                getVelocity().setX(((getHitBox().x - 1) - tileSnapPosX) * -1);
 //                velocity.x = 0;
             }
         }
         // apply y
         // check if the player will overlap the any-tile with the current velocity, modify the velocity so that the player won't
         // overlap and get stuck inside a tile
-        if (!gW.tileManager.checkRectNotIntersectAnyTile(hitBox.x, hitBox.y + velocity.y, hitBox.width, hitBox.height)) {
+        if (!getgW().tileManager.checkRectNotIntersectAnyTile(getHitBox().x, getHitBox().y + getVelocity().getY(), getHitBox().width, getHitBox().height)) {
             int tileSnapPosY = 0;
 //            System.out.println(tileSnapPosY);
-            if (velocity.y > 0) {
-                tileSnapPosY = ((hitBox.y + hitBox.height + velocity.y + 4) / gW.RENDER_TILE_SIZE) * gW.RENDER_TILE_SIZE;
-                velocity.y = ((hitBox.y + hitBox.height + 1) - tileSnapPosY) * -1;
+            if (getVelocity().getY() > 0) {
+                tileSnapPosY = ((getHitBox().y + getHitBox().height + getVelocity().getY() + 4) / getgW().RENDER_TILE_SIZE) * getgW().RENDER_TILE_SIZE;
+                getVelocity().setY(((getHitBox().y + getHitBox().height + 1) - tileSnapPosY) * -1);
 //                System.out.println("!");
             } else {
-                tileSnapPosY = (((hitBox.y + velocity.y - 4) / gW.RENDER_TILE_SIZE) * gW.RENDER_TILE_SIZE) + gW.RENDER_TILE_SIZE;
-                velocity.y = Math.abs(((hitBox.y - 1) - tileSnapPosY));
+                tileSnapPosY = (((getHitBox().y + getVelocity().getY() - 4) / getgW().RENDER_TILE_SIZE) * getgW().RENDER_TILE_SIZE) + getgW().RENDER_TILE_SIZE;
+                getVelocity().setY(Math.abs(((getHitBox().y - 1) - tileSnapPosY)));
 //                System.out.println("*");
 //                velocity.y = 0;
             }
         }
-        worldPosition.x += velocity.x;
-        worldPosition.y += velocity.y;
+        getWorldPosition().setX(getWorldPosition().getX() + getVelocity().getX());
+        getWorldPosition().setY(getWorldPosition().getY() + getVelocity().getY());
         makeHitBoxFollowWorldPos();
 //        hitBox.x += velocity.x;
 //        hitBox.y += velocity.y;
@@ -204,45 +204,45 @@ public class Player extends Entity{
 
     public void animateSprite(){
 
-        if (shootAnimChangeBackFrame <= 0){
-            shootAnim = 0;
+        if (getShootAnimChangeBackFrame() <= 0){
+            setShootAnim(0);
         } else {
-            shootAnimChangeBackFrame--;
+            setShootAnimChangeBackFrame(getShootAnimChangeBackFrame() - 1);
         }
-        if (!jumped){
-            if (spriteAnimateFrame >= 8){
-                spriteAnimateFrame = 0;
-                if (moveSpriteAnimId == 0){
-                    if (lastMoveSpriteAnimId == 2){
-                        moveSpriteAnimId = 1;
-                        lastMoveSpriteAnimId = moveSpriteAnimId;
+        if (!isJumped()){
+            if (getSpriteAnimateFrame() >= 8){
+                setSpriteAnimateFrame(0);
+                if (getMoveSpriteAnimId() == 0){
+                    if (getLastMoveSpriteAnimId() == 2){
+                        setMoveSpriteAnimId(1);
+                        setLastMoveSpriteAnimId(getMoveSpriteAnimId());
                     } else {
-                        moveSpriteAnimId = 2;
-                        lastMoveSpriteAnimId = moveSpriteAnimId;
+                        setMoveSpriteAnimId(2);
+                        setLastMoveSpriteAnimId(getMoveSpriteAnimId());
                     }
                 } else {
-                    moveSpriteAnimId =0;
+                    setMoveSpriteAnimId(0);
                 }
             }
         } else {
-            spriteAnimateFrame = 0;
-            moveSpriteAnimId = 0;
-            lastMoveSpriteAnimId = moveSpriteAnimId;
+            setSpriteAnimateFrame(0);
+            setMoveSpriteAnimId(0);
+            setLastMoveSpriteAnimId(getMoveSpriteAnimId());
         }
     }
 
     public void makeHitBoxFollowWorldPos(){
-        hitBox.x = worldPosition.x + 12;
-        hitBox.y = worldPosition.y + 6;
+        getHitBox().x = getWorldPosition().getX() + 12;
+        getHitBox().y = getWorldPosition().getY() + 6;
     }
 
     @Override
     public void render(Graphics2D g2d){
-        if (invincibilityFrame % 2 == 0) {
-            g2d.drawImage(sprites[facing + shootAnim][spriteId + moveSpriteAnimId], playerScreenPosition.x, playerScreenPosition.y, 24 * gW.TILE_SCALE, 24 * gW.TILE_SCALE, null);
+        if (getInvincibilityFrame() % 2 == 0) {
+            g2d.drawImage(sprites[getFacing() + getShootAnim()][getSpriteId() + getMoveSpriteAnimId()], getPlayerScreenPosition().getX(), getPlayerScreenPosition().getY(), 24 * getgW().TILE_SCALE, 24 * getgW().TILE_SCALE, null);
         }
-        Vector2 rPos = gW.util.worldPosToScreenPos(new Vector2(hitBox.x, hitBox.y));
-        g2d.drawRect(rPos.x, rPos.y, hitBox.width, hitBox.height);
+        Vector2 rPos = getgW().util.worldPosToScreenPos(new Vector2(getHitBox().x, getHitBox().y));
+        g2d.drawRect(rPos.getX(), rPos.getY(), getHitBox().width, getHitBox().height);
 //        rPos = gW.util.worldPosToScreenPos(new Vector2(worldPosition.x / gW.RENDER_TILE_SIZE, worldPosition.y / gW.RENDER_TILE_SIZE));
 //        g2d.drawRect(rPos.x, rPos.y, gW.RENDER_TILE_SIZE, gW.RENDER_TILE_SIZE);
 //        g2d.drawRect(worldPosition.x, worldPosition.y, 24, 24);
@@ -251,24 +251,24 @@ public class Player extends Entity{
 
     @Override
     public void onHit(Vector2 hitPos){
-        if (hitPos.x < worldPosition.x) {
-            gW.player.knockBackDir = 0;
+        if (hitPos.getX() < getWorldPosition().getX()) {
+            getgW().player.setKnockBackDir(0);
         } else {
-            gW.player.knockBackDir = 1;
+            getgW().player.setKnockBackDir(1);
         }
-        if (!invincible){
-            hp --;
-            invincible = true;
+        if (!isInvincible()){
+            setHp(getHp() - 1);
+            setInvincible(true);
         }
     }
 
     public void invincibilityCheck(){
-        if (invincible){
-            if (invincibilityFrame >= MAX_INVINCIBILITY_FRAME){
-                invincible = false;
-                invincibilityFrame = 0;
+        if (isInvincible()){
+            if (getInvincibilityFrame() >= getMAX_INVINCIBILITY_FRAME()){
+                setInvincible(false);
+                setInvincibilityFrame(0);
             } else {
-                invincibilityFrame++;
+                setInvincibilityFrame(getInvincibilityFrame() + 1);
             }
 
         }
@@ -287,17 +287,17 @@ public class Player extends Entity{
 //            }
 //            gW.projectiles.add(p);
 //        }
-        if (PlayerProjectile.projectileCount < 3 && shootTimer >= shootMaxTimer){
-            shootTimer = 0;
-            shootAnim = 2;
-            shootAnimChangeBackFrame = 16;
-            Projectile p = new PlayerProjectile(gW, new Vector2(worldPosition.x + 10, worldPosition.y - 3));
-            p.facing = facing;
-            p.velocity.x = 16;
-            if (facing == 0){
-                p.velocity.x *= -1;
+        if (PlayerProjectile.projectileCount < 3 && getShootTimer() >= getShootMaxTimer()){
+            setShootTimer(0);
+            setShootAnim(2);
+            setShootAnimChangeBackFrame(16);
+            Projectile p = new PlayerProjectile(getgW(), new Vector2(getWorldPosition().getX() + 10, getWorldPosition().getY() - 3));
+            p.setFacing(getFacing());
+            p.getVelocity().setX(16);
+            if (getFacing() == 0){
+                p.getVelocity().setX(p.getVelocity().getX() * -1);
             }
-            gW.projectiles.add(p);
+            getgW().projectiles.add(p);
         }
     }
 
@@ -317,41 +317,181 @@ public class Player extends Entity{
 
 
     int getPosXAtWallEdge(){
-        int tileAt = hitBox.x / gW.RENDER_TILE_SIZE;
-        if (velocity.x > 0){
-            return ((tileAt * gW.RENDER_TILE_SIZE) + (gW.RENDER_TILE_SIZE - hitBox.height)) - 1;
+        int tileAt = getHitBox().x / getgW().RENDER_TILE_SIZE;
+        if (getVelocity().getX() > 0){
+            return ((tileAt * getgW().RENDER_TILE_SIZE) + (getgW().RENDER_TILE_SIZE - getHitBox().height)) - 1;
         }
         else
-            return tileAt * gW.RENDER_TILE_SIZE;
+            return tileAt * getgW().RENDER_TILE_SIZE;
     }
 
     int getPosYAtWallEdge(){
-        int tileAt = hitBox.y / gW.RENDER_TILE_SIZE;
-        if (velocity.y > 0){
+        int tileAt = getHitBox().y / getgW().RENDER_TILE_SIZE;
+        if (getVelocity().getY() > 0){
 //            return ((tileAt * gW.RENDER_TILE_SIZE) + (gW.RENDER_TILE_SIZE - hitBox.height)) + gW.RENDER_TILE_SIZE - 1;
-            return ((tileAt * gW.RENDER_TILE_SIZE) + (gW.RENDER_TILE_SIZE - hitBox.height)) - 1;
+            return ((tileAt * getgW().RENDER_TILE_SIZE) + (getgW().RENDER_TILE_SIZE - getHitBox().height)) - 1;
         }
         else
-            return tileAt * gW.RENDER_TILE_SIZE;
+            return tileAt * getgW().RENDER_TILE_SIZE;
     }
 
     boolean isOnGround(){
-        return (gW.tileManager.isTileBlocking(hitBox.x, hitBox.y + hitBox.height + collisionCheckTileOffset) ||
-                gW.tileManager.isTileBlocking(hitBox.x + hitBox.width, hitBox.y + hitBox.height + collisionCheckTileOffset)) &&
-                (((hitBox.y + hitBox.height + velocity.y + 1) / gW.RENDER_TILE_SIZE) * gW.RENDER_TILE_SIZE) - (hitBox.y + hitBox.height) < 2;
+        return (getgW().tileManager.isTileBlocking(getHitBox().x, getHitBox().y + getHitBox().height + collisionCheckTileOffset) ||
+                getgW().tileManager.isTileBlocking(getHitBox().x + getHitBox().width, getHitBox().y + getHitBox().height + collisionCheckTileOffset)) &&
+                (((getHitBox().y + getHitBox().height + getVelocity().getY() + 1) / getgW().RENDER_TILE_SIZE) * getgW().RENDER_TILE_SIZE) - (getHitBox().y + getHitBox().height) < 2;
     }
 
-//    boolean isCollidingWithWall(){
-//        Vector2 left1 = new Vector2(hitBox.x  - collisionCheckTileOffset, hitBox.y);
-//        Vector2 left2 = new Vector2(hitBox.x  - collisionCheckTileOffset, hitBox.y + hitBox.width);
-//        Vector2 right1 = new Vector2(hitBox.x + hitBox.width + collisionCheckTileOffset, hitBox.y);
-//        Vector2 right2 = new Vector2(hitBox.x  + hitBox.width + collisionCheckTileOffset, hitBox.y + hitBox.width);
-//        Vector2 up = new Vector2(hitBox.x, hitBox.y + hitBox.height + collisionCheckTileOffset);
-//
-//        return (gW.tileManager.checkRectIntersectAnyTile(hitBox, left1) && gW.tileManager.checkRectIntersectAnyTile(hitBox, left2))
-//                || (gW.tileManager.checkRectIntersectAnyTile(hitBox, right1) && gW.tileManager.checkRectIntersectAnyTile(hitBox, right2)) &&
-//                gW.tileManager.checkRectIntersectAnyTile(hitBox, up);
-//    }
+    public Rectangle getHitBox() {
+        return hitBox;
+    }
+
+    public void setHitBox(Rectangle hitBox) {
+        this.hitBox = hitBox;
+    }
+
+    public int getFacing() {
+        return facing;
+    }
+
+    public void setFacing(int facing) {
+        this.facing = facing;
+    }
+
+    public int getSpriteId() {
+        return spriteId;
+    }
+
+    public void setSpriteId(int spriteId) {
+        this.spriteId = spriteId;
+    }
+
+    public int getSpriteAnimateFrame() {
+        return spriteAnimateFrame;
+    }
+
+    public void setSpriteAnimateFrame(int spriteAnimateFrame) {
+        this.spriteAnimateFrame = spriteAnimateFrame;
+    }
+
+    public int getMoveSpriteAnimId() {
+        return moveSpriteAnimId;
+    }
+
+    public void setMoveSpriteAnimId(int moveSpriteAnimId) {
+        this.moveSpriteAnimId = moveSpriteAnimId;
+    }
+
+    public int getLastMoveSpriteAnimId() {
+        return lastMoveSpriteAnimId;
+    }
+
+    public void setLastMoveSpriteAnimId(int lastMoveSpriteAnimId) {
+        this.lastMoveSpriteAnimId = lastMoveSpriteAnimId;
+    }
+
+    public boolean isJumped() {
+        return jumped;
+    }
+
+    public void setJumped(boolean jumped) {
+        this.jumped = jumped;
+    }
+
+    public int getMAX_JUMP_FRAME() {
+        return MAX_JUMP_FRAME;
+    }
+
+    public int getJumpFrame() {
+        return jumpFrame;
+    }
+
+    public void setJumpFrame(int jumpFrame) {
+        this.jumpFrame = jumpFrame;
+    }
+
+    public int getMoveDelayFrame() {
+        return moveDelayFrame;
+    }
+
+    public void setMoveDelayFrame(int moveDelayFrame) {
+        this.moveDelayFrame = moveDelayFrame;
+    }
+
+    public Vector2 getPlayerScreenPosition() {
+        return playerScreenPosition;
+    }
+
+    public void setPlayerScreenPosition(Vector2 playerScreenPosition) {
+        this.playerScreenPosition = playerScreenPosition;
+    }
+
+    public int getShootTimer() {
+        return shootTimer;
+    }
+
+    public void setShootTimer(int shootTimer) {
+        this.shootTimer = shootTimer;
+    }
+
+    public int getShootMaxTimer() {
+        return shootMaxTimer;
+    }
+
+    public void setShootMaxTimer(int shootMaxTimer) {
+        this.shootMaxTimer = shootMaxTimer;
+    }
+
+    public int getShootAnim() {
+        return shootAnim;
+    }
+
+    public void setShootAnim(int shootAnim) {
+        this.shootAnim = shootAnim;
+    }
+
+    public int getShootAnimChangeBackFrame() {
+        return shootAnimChangeBackFrame;
+    }
+
+    public void setShootAnimChangeBackFrame(int shootAnimChangeBackFrame) {
+        this.shootAnimChangeBackFrame = shootAnimChangeBackFrame;
+    }
+
+    public int getMAX_INVINCIBILITY_FRAME() {
+        return MAX_INVINCIBILITY_FRAME;
+    }
+
+    public int getKnockBackDir() {
+        return knockBackDir;
+    }
+
+    public void setKnockBackDir(int knockBackDir) {
+        this.knockBackDir = knockBackDir;
+    }
+
+    public int getInvincibilityFrame() {
+        return invincibilityFrame;
+    }
+
+    public void setInvincibilityFrame(int invincibilityFrame) {
+        this.invincibilityFrame = invincibilityFrame;
+    }
+
+    public boolean isInvincible() {
+        return invincible;
+    }
+
+    public void setInvincible(boolean invincible) {
+        this.invincible = invincible;
+    }
+
+    public int getHp() {
+        return hp;
+    }
+
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
 
 
 }

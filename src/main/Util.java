@@ -19,12 +19,12 @@ public class Util {
 
 
     public Vector2 worldPosToScreenPos(Vector2 worldPos){
-        return new Vector2(worldPos.x + gW.viewportPosition.x, worldPos.y + gW.viewportPosition.y);
+        return new Vector2(worldPos.getX() + gW.viewportPosition.getX(), worldPos.getY() + gW.viewportPosition.getY());
     }
 
     public boolean isWorldPosOnScreen(Vector2 worldPos){
         Vector2 sc = worldPosToScreenPos(worldPos);
-        return sc.x >= 0 && sc.x <= gW.SCREEN_WIDTH && sc.y >= 0 && sc.y <= gW.SCREEN_HEIGHT;
+        return sc.getX() >= 0 && sc.getX() <= gW.SCREEN_WIDTH && sc.getY() >= 0 && sc.getY() <= gW.SCREEN_HEIGHT;
     }
 
     public boolean isRectOnScreen(Rectangle rect){
@@ -54,7 +54,7 @@ public class Util {
     public void drawDebugRect(Graphics2D g2d, Rectangle rect){
         g2d.setColor(Color.GREEN);
         Vector2 wp = worldPosToScreenPos(new Vector2(rect.x, rect.y));
-        g2d.drawRect(wp.x, wp.y, rect.width, rect.height);
+        g2d.drawRect(wp.getX(), wp.getY(), rect.width, rect.height);
     }
 
     public BufferedImage[][] loadGraphic2D(String spritePath, int TileSize){

@@ -15,8 +15,6 @@ public class Main {
 
         GameWindow gw = new GameWindow();
 
-        
-        
         window.add(gw);
         window.pack();
 

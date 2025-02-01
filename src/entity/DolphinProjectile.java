@@ -10,37 +10,37 @@ public class DolphinProjectile extends Projectile{
     public DolphinProjectile(GameWindow gW, Vector2 worldPosition){
         super(gW, worldPosition);
         loadSprites("sprites/enemy2_projectile.png");
-        hitBox = new Rectangle(worldPosition.x + 18, worldPosition.y + 12, 24 * gW.TILE_SCALE - 12 * gW.TILE_SCALE, 24 * gW.TILE_SCALE - 5 * gW.TILE_SCALE);
-        screenPosition = gW.util.worldPosToScreenPos(worldPosition);
+        setHitBox(new Rectangle(worldPosition.getX() + 18, worldPosition.getY() + 12, 24 * gW.TILE_SCALE - 12 * gW.TILE_SCALE, 24 * gW.TILE_SCALE - 5 * gW.TILE_SCALE));
+        setScreenPosition(gW.util.worldPosToScreenPos(worldPosition));
     }
 
     @Override
     public void process(){
-        worldPosition.x += velocity.x;
-        hitBox.x += velocity.x;
-        screenPosition = gW.util.worldPosToScreenPos(worldPosition);
+        getWorldPosition().setX(getWorldPosition().getX() + getVelocity().getX());
+        getHitBox().x += getVelocity().getX();
+        setScreenPosition(getgW().util.worldPosToScreenPos(getWorldPosition()));
         checkCollisionWithEntity();
-        if (!gW.util.isRectOnScreenPartial(hitBox)){
-            gW.entitiesToDelete.add(this);
+        if (!getgW().util.isRectOnScreenPartial(getHitBox())){
+            getgW().entitiesToDelete.add(this);
         }
     }
 
     @Override
     public void render(Graphics2D g2d) {
-        g2d.drawImage(sprites[facing][0], screenPosition.x, screenPosition.y, 24 * gW.TILE_SCALE, 24 * gW.TILE_SCALE, null);
-        gW.util.drawDebugRect(g2d, hitBox);
+        g2d.drawImage(sprites[getFacing()][0], getScreenPosition().getX(), getScreenPosition().getY(), 24 * getgW().TILE_SCALE, 24 * getgW().TILE_SCALE, null);
+        getgW().util.drawDebugRect(g2d, getHitBox());
     }
 
     public void checkCollisionWithEntity() {
-        if (hitBox.intersects(gW.player.hitBox)){
-            if (!gW.player.invincible){
-                gW.player.onHit(worldPosition);
-                gW.entitiesToDelete.add(this);
+        if (getHitBox().intersects(getgW().player.getHitBox())){
+            if (!getgW().player.isInvincible()){
+                getgW().player.onHit(getWorldPosition());
+                getgW().entitiesToDelete.add(this);
             }
         }
     }
 
     void loadSprites(String spritePath){
-        sprites = gW.util.loadGraphic2D(spritePath, 24);
+        sprites = getgW().util.loadGraphic2D(spritePath, 24);
     }
 }

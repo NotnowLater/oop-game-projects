@@ -5,7 +5,7 @@ import main.Vector2;
 
 public class EnemyFactory {
 
-    public GameWindow gW;
+    private GameWindow gW;
 
     public EnemyFactory(GameWindow gW){
         this.gW = gW;
