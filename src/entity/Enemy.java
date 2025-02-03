@@ -15,11 +15,18 @@ public abstract class Enemy extends Entity {
 
     private Vector2 velocity = new Vector2(0, 0);
 
+    private boolean respawnable = true;
+    private boolean invincible = false;
     private boolean isActive;
     private boolean isDead;
 
     public Enemy(GameWindow gW, Vector2 worldPos){
         super(gW, worldPos);
+    }
+
+    public Enemy(GameWindow gW, Vector2 worldPos, boolean respawnable){
+        super(gW, worldPos);
+        this.respawnable = respawnable;
     }
 
     public void checkCollisionWithPlayer(){
@@ -129,5 +136,21 @@ public abstract class Enemy extends Entity {
 
     public void setDead(boolean dead) {
         isDead = dead;
+    }
+
+    public boolean isRespawnable() {
+        return respawnable;
+    }
+
+    public void setRespawnable(boolean respawnable) {
+        this.respawnable = respawnable;
+    }
+
+    public boolean isInvincible() {
+        return invincible;
+    }
+
+    public void setInvincible(boolean invincible) {
+        this.invincible = invincible;
     }
 }

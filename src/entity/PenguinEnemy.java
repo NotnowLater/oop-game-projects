@@ -28,7 +28,6 @@ public class PenguinEnemy extends Enemy{
 
     final int MAX_INVINCIBILITY_FRAME = 16;
     private int invincibilityFrame = 0;
-    private boolean invincible = false;
     private int hp = 3;
 
     private int currentState = 0;
@@ -155,6 +154,7 @@ public class PenguinEnemy extends Enemy{
                 setSpriteWalkFrame(0);
                 setSpriteWalkId(getSpriteWalkId() + 1);
                 if (getSpriteWalkId() == 3){
+                    // start jump
                     getVelocity().setY(-12);
                     setSpriteWalkId(getSpriteWalkId() + 1);
                     changeStateTo(2);
@@ -192,6 +192,9 @@ public class PenguinEnemy extends Enemy{
             setHp(getHp() - 1);
             setInvincible(true);
             if (getHp() <= 0){
+                if (!isRespawnable()){
+                    getgW().entitiesToDelete.add(this);
+                }
                 setDead(true);
                 getgW().effects.add(getgW().enemyFactory.getEnemy(-1, new Vector2(getWorldPosition())));
             }
@@ -308,14 +311,6 @@ public class PenguinEnemy extends Enemy{
 
     public void setInvincibilityFrame(int invincibilityFrame) {
         this.invincibilityFrame = invincibilityFrame;
-    }
-
-    public boolean isInvincible() {
-        return invincible;
-    }
-
-    public void setInvincible(boolean invincible) {
-        this.invincible = invincible;
     }
 
     public int getHp() {

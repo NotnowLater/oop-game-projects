@@ -5,16 +5,13 @@ import main.Vector2;
 
 import java.awt.*;
 
-public class PlayerProjectile extends Projectile{
+public class WhaleBossProjectile extends Projectile{
 
-    public static int projectileCount = 0;
-
-    public PlayerProjectile(GameWindow gW, Vector2 worldPosition){
+    public WhaleBossProjectile(GameWindow gW, Vector2 worldPosition){
         super(gW, worldPosition);
-        loadSprites("sprites/player_projectile.png");
-        setHitBox(new Rectangle(worldPosition.getX() + 15, worldPosition.getY() + 30, 16 * gW.TILE_SCALE, 6 * gW.TILE_SCALE));
+        loadSprites("sprites/boss_projectile.png");
+        setHitBox(new Rectangle(worldPosition.getX() + 21, worldPosition.getY() + 24, 24 * gW.TILE_SCALE - 15 * gW.TILE_SCALE, 24 * gW.TILE_SCALE - 16 * gW.TILE_SCALE));
         setScreenPosition(gW.util.worldPosToScreenPos(worldPosition));
-        projectileCount++;
     }
 
     @Override
@@ -25,7 +22,6 @@ public class PlayerProjectile extends Projectile{
         checkCollisionWithEntity();
         if (!getgW().util.isRectOnScreenPartial(getHitBox())){
             getgW().entitiesToDelete.add(this);
-            projectileCount--;
         }
     }
 
@@ -35,17 +31,13 @@ public class PlayerProjectile extends Projectile{
         getgW().util.drawDebugRect(g2d, getHitBox());
     }
 
-    public void checkCollisionWithEntity(){
-        for (Enemy e : getgW().enemies){
-            if (getHitBox().intersects(e.getHitBox())){
-                if (!e.isDead() && e.isActive() && !e.isInvincible()){
-                    e.onHit(getWorldPosition());
-                    getgW().entitiesToDelete.add(this);
-                    projectileCount--;
-                }
+    public void checkCollisionWithEntity() {
+        if (getHitBox().intersects(getgW().player.getHitBox())){
+            if (!getgW().player.isInvincible()){
+                getgW().player.onHit(getWorldPosition());
+                getgW().entitiesToDelete.add(this);
             }
         }
-
     }
 
     void loadSprites(String spritePath){

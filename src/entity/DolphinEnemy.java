@@ -26,7 +26,6 @@ public class DolphinEnemy extends Enemy{
 
     private final int MAX_INVINCIBILITY_FRAME = 16;
     private int invincibilityFrame = 0;
-    private boolean invincible = false;
     private int hp = 3;
 
     public DolphinEnemy(GameWindow gW, Vector2 worldPos, String spritePath){
@@ -42,9 +41,12 @@ public class DolphinEnemy extends Enemy{
 
     @Override
     public void process(){
+        // spawn when on screen
         if (getgW().util.isRectOnScreen(getHitBox()) && !isActive() && !isDead()){
             setActive(true);
-        } else if (!getgW().util.isRectOnScreen(getHitBox()) && isDead()){
+        }
+        // respawn when off-screen
+        else if (!getgW().util.isRectOnScreen(getHitBox()) && isDead()){
             setDead(false);
             setActive(false);
         }
@@ -166,6 +168,9 @@ public class DolphinEnemy extends Enemy{
             setHp(getHp() - 1);
             setInvincible(true);
             if (getHp() <= 0){
+                if (!isRespawnable()){
+                    getgW().entitiesToDelete.add(this);
+                }
                 setDead(true);
                 getgW().effects.add(getgW().enemyFactory.getEnemy(-1, new Vector2(getWorldPosition())));
             }
@@ -288,14 +293,6 @@ public class DolphinEnemy extends Enemy{
 
     public void setInvincibilityFrame(int invincibilityFrame) {
         this.invincibilityFrame = invincibilityFrame;
-    }
-
-    public boolean isInvincible() {
-        return invincible;
-    }
-
-    public void setInvincible(boolean invincible) {
-        this.invincible = invincible;
     }
 
     public int getHp() {

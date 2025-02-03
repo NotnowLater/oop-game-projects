@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class GameWindow extends JPanel implements Runnable {
     // ScreenSize
@@ -26,6 +27,7 @@ public class GameWindow extends JPanel implements Runnable {
     final int GAME_MAX_UPS = 60;
     Thread gameThread;
 
+    private Random rng = new Random(System.currentTimeMillis());
     public Util util = new Util(this);
     public TileManager tileManager = new TileManager(this);
     public KeyInputHandler keyInputHandler = new KeyInputHandler(this);
@@ -40,6 +42,7 @@ public class GameWindow extends JPanel implements Runnable {
     public List<Entity> entitiesToDelete = new ArrayList<Entity>();
     public List<Projectile> projectiles = new ArrayList<Projectile>();
     public List<Enemy> enemies = new ArrayList<Enemy>();
+    private List<Enemy> enemyToSpawn = new ArrayList<Enemy>();
     public List<Enemy> effects = new ArrayList<Enemy>();
 
     public  GameWindow(){
@@ -57,29 +60,29 @@ public class GameWindow extends JPanel implements Runnable {
     }
 
     public void initGame(){
-        enemies.add(enemyFactory.getEnemy(2,new Vector2(1440, 1300)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(1440, 1356)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(1680, 1356)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(1920, 1356)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(3264, 1356)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(5472, 1500)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(5760, 1500)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(6048, 1500)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(7440, 2076)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(7536, 2076)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(7632, 2076)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(7728, 2076)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(7824, 2076)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(7920, 2076)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(10176, 1404)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(13776, 1308)));
-        enemies.add(enemyFactory.getEnemy(0, new Vector2(17376, 540)));
-        enemies.add(enemyFactory.getEnemy(1, new Vector2(2928, 1392)));
-        enemies.add(enemyFactory.getEnemy(1, new Vector2(4176, 1392)));
-        enemies.add(enemyFactory.getEnemy(1, new Vector2(6864, 2064)));
-        enemies.add(enemyFactory.getEnemy(1, new Vector2(7344, 2064)));
-        enemies.add(enemyFactory.getEnemy(1, new Vector2(7824, 2064)));
-        enemies.add(enemyFactory.getEnemy(1, new Vector2(15792, 768)));
+        enemies.add(enemyFactory.getEnemy(3,new Vector2(1440, 828)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(1440, 1356)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(1680, 1356)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(1920, 1356)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(3264, 1356)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(5472, 1500)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(5760, 1500)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(6048, 1500)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(7440, 2076)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(7536, 2076)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(7632, 2076)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(7728, 2076)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(7824, 2076)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(7920, 2076)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(10176, 1404)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(13776, 1308)));
+//        enemies.add(enemyFactory.getEnemy(0, new Vector2(17376, 540)));
+//        enemies.add(enemyFactory.getEnemy(1, new Vector2(2928, 1392)));
+//        enemies.add(enemyFactory.getEnemy(1, new Vector2(4176, 1392)));
+//        enemies.add(enemyFactory.getEnemy(1, new Vector2(6864, 2064)));
+//        enemies.add(enemyFactory.getEnemy(1, new Vector2(7344, 2064)));
+//        enemies.add(enemyFactory.getEnemy(1, new Vector2(7824, 2064)));
+//        enemies.add(enemyFactory.getEnemy(1, new Vector2(15792, 768)));
     }
 
     @Override
@@ -125,6 +128,10 @@ public class GameWindow extends JPanel implements Runnable {
 
     // Main game loop process
     public void process(){
+        // spawn enemy
+        enemies.addAll(enemyToSpawn);
+        enemyToSpawn.clear();
+        // process all entity
         player.process();
         for (Projectile p : projectiles){
             p.process();
@@ -162,5 +169,12 @@ public class GameWindow extends JPanel implements Runnable {
         g2d.dispose();
     }
 
+    public Random getRng(){
+        return rng;
+    }
+
+    public void addEnemyToSpawn(Enemy e){
+        enemyToSpawn.add(e);
+    }
 
 }

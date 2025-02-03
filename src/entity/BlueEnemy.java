@@ -97,6 +97,9 @@ public class BlueEnemy extends Enemy{
 
     @Override
     public void onHit(Vector2 hitPos){
+        if (!isRespawnable()){
+            getgW().entitiesToDelete.add(this);
+        }
         setDead(true);
         getgW().effects.add(getgW().enemyFactory.getEnemy(-1, new Vector2(getWorldPosition())));
     }

@@ -19,6 +19,8 @@ public class EnemyFactory {
                 return new DolphinEnemy(gW, worldPos, "sprites/enemy2.png");
             case 2:
                 return new PenguinEnemy(gW, worldPos, "sprites/enemy3.png");
+            case 3:
+                return new WhaleBossEnemy(gW, worldPos, "sprites/boss.png");
             default:
                 return new ExplosionEnemy(gW, worldPos, "sprites/explosion.png");
         }
