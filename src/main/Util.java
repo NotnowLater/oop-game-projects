@@ -19,7 +19,9 @@ public class Util {
 
 
     public Vector2 worldPosToScreenPos(Vector2 worldPos){
-        return new Vector2(worldPos.getX() + gW.viewportPosition.getX(), worldPos.getY() + gW.viewportPosition.getY());
+        Vector2 vp = gW.getViewportPosition();
+//        return new Vector2(vp.getX() - worldPos.getX() , vp.getY() - worldPos.getY());
+        return new Vector2( worldPos.getX() - vp.getX() , worldPos.getY() - vp.getY());
     }
 
     public boolean isWorldPosOnScreen(Vector2 worldPos){

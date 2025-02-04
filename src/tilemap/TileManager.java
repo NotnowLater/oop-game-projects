@@ -56,7 +56,7 @@ public class TileManager {
 //                }
 //            }
 //        }
-        Vector2 start = new Vector2(Math.abs(gW.viewportPosition.getX() / gW.RENDER_TILE_SIZE), Math.abs(gW.viewportPosition.getY() / gW.RENDER_TILE_SIZE));
+        Vector2 start = new Vector2(Math.abs(gW.getViewportPosition().getX() / gW.RENDER_TILE_SIZE), Math.abs(gW.getViewportPosition().getY() / gW.RENDER_TILE_SIZE));
         for (int i = start.getY(); i < start.getY() + gW.SCREEN_TILE_HEIGHT + 1; i++){
             for (int j = start.getX(); j < start.getX() + gW.SCREEN_TILE_WIDTH + 1; j++){
                 int tileWorldX = j * gW.RENDER_TILE_SIZE;

@@ -33,9 +33,11 @@ public class GameWindow extends JPanel implements Runnable {
     public KeyInputHandler keyInputHandler = new KeyInputHandler(this);
     public HUDManager hudManager = new HUDManager(this);
 
-    public Vector2 viewportPosition = new Vector2(0, 0);
+    private Vector2 viewportPosition = new Vector2(0, 0);
+    private ViewportManager viewportManager = new ViewportManager(this);
 
-    public Player player = new Player(this, new Vector2(780, 1200));
+    public Player player = new Player(this, new Vector2(780, 1402));
+//    public Player player = new Player(this, new Vector2(18571, 602));
 
     public EnemyFactory enemyFactory = new EnemyFactory(this);
 
@@ -60,29 +62,31 @@ public class GameWindow extends JPanel implements Runnable {
     }
 
     public void initGame(){
-        enemies.add(enemyFactory.getEnemy(3,new Vector2(1440, 828)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(1440, 1356)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(1680, 1356)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(1920, 1356)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(3264, 1356)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(5472, 1500)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(5760, 1500)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(6048, 1500)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(7440, 2076)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(7536, 2076)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(7632, 2076)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(7728, 2076)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(7824, 2076)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(7920, 2076)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(10176, 1404)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(13776, 1308)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(17376, 540)));
-//        enemies.add(enemyFactory.getEnemy(1, new Vector2(2928, 1392)));
-//        enemies.add(enemyFactory.getEnemy(1, new Vector2(4176, 1392)));
-//        enemies.add(enemyFactory.getEnemy(1, new Vector2(6864, 2064)));
-//        enemies.add(enemyFactory.getEnemy(1, new Vector2(7344, 2064)));
-//        enemies.add(enemyFactory.getEnemy(1, new Vector2(7824, 2064)));
-//        enemies.add(enemyFactory.getEnemy(1, new Vector2(15792, 768)));
+//        player.setWorldPosition(new Vector2(18571, 602));
+        enemies.add(enemyFactory.getEnemy(3,new Vector2(19585, 828)));
+        enemies.add(new PlayerAreaCameraAxisLockTrigger(this, new Vector2(19200, 1455), new Vector2(2560, 48)));
+        enemies.add(enemyFactory.getEnemy(2, new Vector2(1440, 1356)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(1680, 1356)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(1920, 1356)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(3264, 1356)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(5472, 1500)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(5760, 1500)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(6048, 1500)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(7440, 2076)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(7536, 2076)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(7632, 2076)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(7728, 2076)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(7824, 2076)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(7920, 2076)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(10176, 1404)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(13776, 1308)));
+        enemies.add(enemyFactory.getEnemy(0, new Vector2(17376, 540)));
+        enemies.add(enemyFactory.getEnemy(1, new Vector2(2928, 1392)));
+        enemies.add(enemyFactory.getEnemy(1, new Vector2(4176, 1392)));
+        enemies.add(enemyFactory.getEnemy(1, new Vector2(6864, 2064)));
+        enemies.add(enemyFactory.getEnemy(1, new Vector2(7344, 2064)));
+        enemies.add(enemyFactory.getEnemy(1, new Vector2(7824, 2064)));
+        enemies.add(enemyFactory.getEnemy(1, new Vector2(15792, 768)));
     }
 
     @Override
@@ -131,6 +135,8 @@ public class GameWindow extends JPanel implements Runnable {
         // spawn enemy
         enemies.addAll(enemyToSpawn);
         enemyToSpawn.clear();
+
+        viewportManager.process();
         // process all entity
         player.process();
         for (Projectile p : projectiles){
@@ -177,4 +183,15 @@ public class GameWindow extends JPanel implements Runnable {
         enemyToSpawn.add(e);
     }
 
+    public Vector2 getViewportPosition() {
+        return viewportPosition;
+    }
+
+    public void setViewportPosition(Vector2 newPos){
+        viewportPosition = new Vector2(newPos);
+    }
+
+    public ViewportManager getViewportManager() {
+        return viewportManager;
+    }
 }

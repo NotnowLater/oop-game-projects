@@ -21,7 +21,7 @@ public class WhaleBossEnemy extends Enemy{
 
     final int MAX_INVINCIBILITY_FRAME = 16;
     private int invincibilityFrame = 0;
-    private int hp = 32;
+    private int hp = 1;
 
     private int idleDone;
     private int currentState;
@@ -78,6 +78,7 @@ public class WhaleBossEnemy extends Enemy{
         setScreenPosition(getgW().util.worldPosToScreenPos(getWorldPosition()));
         animateSprite();
         applyVelocity();
+        checkCollisionWithPlayer();
     }
 
 
@@ -164,6 +165,7 @@ public class WhaleBossEnemy extends Enemy{
             setInvincible(true);
             if (getHp() <= 0){
                 getgW().entitiesToDelete.add(this);
+                getgW().getViewportManager().setViewportFollowingAnchor(true);
                 setDead(true);
                 getgW().effects.add(getgW().enemyFactory.getEnemy(-1, new Vector2(getWorldPosition())));
             }
@@ -198,7 +200,7 @@ public class WhaleBossEnemy extends Enemy{
 
     private void spawnEnemy(){
         Enemy e;
-        if (getgW().getRng().nextInt(100) > 60){
+        if (getgW().getRng().nextInt(100) > 75){
             e = getgW().enemyFactory.getEnemy(1, new Vector2(getWorldPosition().getX() + 12 * getgW().TILE_SCALE, getWorldPosition().getY() + 127 * getgW().TILE_SCALE));
         } else {
             e = getgW().enemyFactory.getEnemy(2, new Vector2(getWorldPosition().getX() + 12 * getgW().TILE_SCALE, getWorldPosition().getY() + 127 * getgW().TILE_SCALE));

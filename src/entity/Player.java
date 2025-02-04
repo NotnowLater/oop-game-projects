@@ -50,13 +50,13 @@ public class Player extends Entity{
         // center the player on the screen
         setPlayerScreenPosition(gW.util.worldPosToScreenPos(worldPosition));
         this.setHitBox(new Rectangle(worldPosition.getX() + 12, worldPosition.getY() + 6, 24 * 3 - 7 * 3, 24 * 3 - 3 * 3));
-        gW.viewportPosition = new Vector2((gW.SCREEN_WIDTH / 2) - worldPosition.getX(), (gW.SCREEN_HEIGHT / 2)  - worldPosition.getY());
+        getgW().getViewportManager().setViewportPositionFromCenterRelative(new Vector2(getWorldPosition()));
         loadSprites();
     }
 
     @Override
     public void process(){
-//        System.out.println(worldPosition);
+//        System.out.println(getVelocity());
         // Jump
         if (getgW().keyInputHandler.confirm && !(isInvincible() && getInvincibilityFrame() < 8)){
             if (!isJumped()){
@@ -154,7 +154,7 @@ public class Player extends Entity{
         invincibilityCheck();
         applyVelocity();
         animateSprite();
-        getgW().viewportPosition = new Vector2((getgW().SCREEN_WIDTH / 2) - getWorldPosition().getX(), (getgW().SCREEN_HEIGHT / 2)  - getWorldPosition().getY());
+        getgW().getViewportManager().setViewportFollowCenterAnchor(new Vector2(getWorldPosition()));
 //        gW.screenPosition = new Vector2((gW.SCREEN_WIDTH / 2) - worldPosition.x, gW.screenPosition.y);
         setPlayerScreenPosition(getgW().util.worldPosToScreenPos(getWorldPosition()));
 //        System.out.println(moveSpriteAnimId);
@@ -163,6 +163,8 @@ public class Player extends Entity{
     }
 
     public void applyVelocity(){
+        // limit the velocity
+        setVelocity(new Vector2(getVelocity().getX(), Math.clamp(getVelocity().getY(), -48, 48)));
         // apply x
         // check if the player will overlap the any-tile with the current velocity, modify the velocity so that the player won't
         // overlap and get stuck inside a tile
