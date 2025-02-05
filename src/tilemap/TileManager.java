@@ -13,7 +13,7 @@ public class TileManager {
 
     private GameWindow gW;
 
-    private Tile[] tileSet = new Tile[1060];
+    private Tile[] tileSet = new Tile[1140];
 
     private TileMap currentMap;
 
@@ -23,7 +23,7 @@ public class TileManager {
     public TileManager(GameWindow gW){
         this.gW = gW;
         loadTileSet();
-        currentMap = new TileMap(460, 51, "tilemapdata/test_map.csv");
+        currentMap = new TileMap(493, 51, "tilemapdata/test_map.csv");
 
     }
 

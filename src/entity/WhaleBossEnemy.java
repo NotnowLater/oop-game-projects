@@ -21,7 +21,7 @@ public class WhaleBossEnemy extends Enemy{
 
     final int MAX_INVINCIBILITY_FRAME = 16;
     private int invincibilityFrame = 0;
-    private int hp = 1;
+    private int hp = 32;
 
     private int idleDone;
     private int currentState;
