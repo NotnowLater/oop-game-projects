@@ -6,7 +6,7 @@ import main.Vector2;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class DolphinEnemy extends Enemy{
+public class BullEnemy extends Enemy{
     BufferedImage[][] sprites;
 
     private int spriteWalkFrame = 0;
@@ -20,20 +20,24 @@ public class DolphinEnemy extends Enemy{
 
     private boolean movingLeft;
 
-    private boolean shooting;
-    private int shootFrame;
-    private final int MAX_SHOOT_FRAME = 16;
+    private boolean canJump;
+    private boolean jumping;
+    private int jumpToPlayerFacing = 0;
+    private int jumpFrame;
+    final int MAX_SHOOT_FRAME = 30;
 
-    private final int MAX_INVINCIBILITY_FRAME = 32;
+    final int MAX_INVINCIBILITY_FRAME = 30;
     private int invincibilityFrame = 0;
     private int hp = 3;
 
-    public DolphinEnemy(GameWindow gW, Vector2 worldPos, String spritePath){
+    private int currentState = 0;
+
+    public BullEnemy(GameWindow gW, Vector2 worldPos, String spritePath){
         super(gW, worldPos);
         loadSprites(spritePath);
         setNotActiveWorldPos(new Vector2(worldPos));
         setScreenPosition(gW.util.worldPosToScreenPos(worldPos));
-        setHitBox(new Rectangle(worldPos.getX() + 27, worldPos.getY() + 3,32 * gW.TILE_SCALE - 15 * gW.TILE_SCALE, 32 * gW.TILE_SCALE - 2 * gW.TILE_SCALE ));
+        setHitBox(new Rectangle(worldPos.getX() + 27, worldPos.getY() + 3,24 * gW.TILE_SCALE - 15 * gW.TILE_SCALE, 24 * gW.TILE_SCALE - 2 * gW.TILE_SCALE ));
         setNotActiveHitBoxWorldPos(new Vector2(getHitBox().x, getHitBox().y));
         setActive(false);
         setDead(false);
@@ -41,19 +45,17 @@ public class DolphinEnemy extends Enemy{
 
     @Override
     public void process(){
-        // spawn when on screen
         if (getgW().util.isRectOnScreen(getHitBox()) && !isActive() && !isDead()){
             setActive(true);
-        }
-        // respawn when off-screen
-        else if (!getgW().util.isRectOnScreen(getHitBox()) && isDead()){
+        } else if (!getgW().util.isRectOnScreen(getHitBox()) && isDead()){
             setDead(false);
             setActive(false);
         }
         if (!isDead() && isActive()){
             setInAttackRange(getWorldPosition().distanceTo(getgW().player.getWorldPosition()) <= 456);
-            if (!isInAttackRange()){
-                setShooting(false);
+            // walking state
+            if (getCurrentState() == 0){
+                setCanJump(false);
                 if (isMovingLeft() && (!getgW().tileManager.isTileBlocking(getHitBox().x - 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset()) || getgW().tileManager.isTileBlocking(getHitBox().x - getCollisionCheckTileOffset(), getHitBox().y))){
                     setMovingLeft(false);
                 } else if (!isMovingLeft() && (!getgW().tileManager.isTileBlocking(getHitBox().x + getHitBox().width + 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset()) || getgW().tileManager.isTileBlocking(getHitBox().x + getHitBox().width + getCollisionCheckTileOffset(), getHitBox().y))){
@@ -67,26 +69,47 @@ public class DolphinEnemy extends Enemy{
                     setFacing(0);
                 }
                 if (!isOnGround()){
-                    getVelocity().setY(10);
+                    getVelocity().setY(getVelocity().getY() + 2);
+                    if (getVelocity().getY() > 10){
+                        getVelocity().setY(10);
+                    }
                 }
-
-            } else {
-                // InPlayerRange
-                getVelocity().setX(0);
-                if (getgW().player.getWorldPosition().getX() > getWorldPosition().getX()){
-                    setFacing(1);
-                    setMovingLeft(false);
+                if (isInAttackRange()){
+                    changeStateTo(1);
+                    if (getgW().player.getWorldPosition().getX() <= getWorldPosition().getX()){
+                        setFacing(0);
+                        setMovingLeft(true);
+                    } else {
+                        setFacing(1);
+                        setMovingLeft(false);
+                    }
+                    setSpriteWalkId(0);
+                    setSpriteWalkFrame(0);
+                    getVelocity().setX(0);
+                }
+            }
+            // dash state
+            else if(getCurrentState() == 2){
+                setInvincible(true);
+                setInvincibilityFrame(1);
+                if (!isOnGround()){
+                    getVelocity().setY(getVelocity().getY() + 2);
+                    if (getVelocity().getY() > 10){
+                        getVelocity().setY(10);
+                    }
+                }
+                if (isMovingLeft()){
+                    getVelocity().setX(getVelocity().getX() + 1);
                 } else {
-                    setFacing(0);
-                    setMovingLeft(true);
+                    getVelocity().setX(getVelocity().getX() - 1);
                 }
-                if (getShootFrame() >= getMAX_SHOOT_FRAME() && !isShooting()){
-                    setShootFrame(0);
-                    setShooting(true);
-                } else {
-                    setShootFrame(getShootFrame() + 1);
+                if (Math.abs(getVelocity().getX()) == 0){
+                    setInvincible(false);
+                    setInvincibilityFrame(0);
+                    changeStateTo(0);
+                    setSpriteWalkId(0);
+                    getVelocity().setX(0);
                 }
-
             }
             invincibilityCheck();
             applyVelocity();
@@ -95,6 +118,7 @@ public class DolphinEnemy extends Enemy{
             checkCollisionWithPlayer();
         } else {
             // respawn
+            changeStateTo(0);
             setInvincible(false);
             invincibilityCheck();
             setMovingLeft(getgW().player.getWorldPosition().getX() <= getWorldPosition().getX());
@@ -108,7 +132,7 @@ public class DolphinEnemy extends Enemy{
     }
 
     public void animateSprite(){
-        if (!isInAttackRange()) {
+        if (getCurrentState() == 0) {
             if (getSpriteWalkFrame() >= 8) {
                 setSpriteWalkFrame(0);
                 if (getSpriteWalkId() == 0) {
@@ -125,41 +149,30 @@ public class DolphinEnemy extends Enemy{
             } else {
                 setSpriteWalkFrame(getSpriteWalkFrame() + 1);
             }
-        } else {
-            if (!isShooting()){
-                setSpriteWalkId(0);
-            } else {
-                if (getSpriteWalkFrame() >= 8){
-                    setSpriteWalkFrame(0);
-                    setSpriteWalkId(getSpriteWalkId() + 1);
-                    if (getSpriteWalkId() == 3){
-                        shootPlayer();
-                    } else if (getSpriteWalkId() == 5){
-                        setShooting(false);
-                        setShootFrame(0);
-                        setSpriteWalkId(0);
+        } else if (getCurrentState() == 1){
+            if (getSpriteWalkFrame() >= 8){
+                setSpriteWalkFrame(0);
+                setSpriteWalkId(getSpriteWalkId() + 1);
+                if (getSpriteWalkId() == 3){
+                    // start dash
+                    if (isMovingLeft()){
+                        getVelocity().setX(-28);
+                    } else {
+                        getVelocity().setX(28);
                     }
-                } else {
-                    setSpriteWalkFrame(getSpriteWalkFrame() + 1);
+                    setSpriteWalkId(getSpriteWalkId() + 1);
+                    changeStateTo(2);
                 }
+            } else {
+                setSpriteWalkFrame(getSpriteWalkFrame() + 1);
             }
         }
     }
 
-    public void shootPlayer(){
-        Vector2 spawnPoint;
-        if (getFacing() == 0){
-            spawnPoint = new Vector2(getWorldPosition().getX() - 24, getWorldPosition().getY() + 22);
-        } else {
-            spawnPoint = new Vector2(getWorldPosition().getX() + 24, getWorldPosition().getY() + 22);
+    public void changeStateTo(int newState){
+        if (newState != getCurrentState()){
+            setCurrentState(newState);
         }
-        Projectile p = new DolphinProjectile(getgW(), new Vector2(spawnPoint));
-        p.setFacing(getFacing());
-        p.getVelocity().setX(16);
-        if (getFacing() == 0){
-            p.getVelocity().setX(p.getVelocity().getX() * -1);
-        }
-        getgW().projectiles.add(p);
     }
 
     @Override
@@ -193,10 +206,10 @@ public class DolphinEnemy extends Enemy{
     public void render(Graphics2D g2d){
         if (!isDead() && isActive()){
             if (getInvincibilityFrame() % 2 == 0) {
-                if (!isShooting()){
-                    g2d.drawImage(sprites[getFacing()][getSpriteWalkId()], getScreenPosition().getX(), getScreenPosition().getY(), 32 * getgW().TILE_SCALE, 32 * getgW().TILE_SCALE, null);
+                if (getCurrentState() == 0){
+                    g2d.drawImage(sprites[getFacing()][getSpriteWalkId()], getScreenPosition().getX(), getScreenPosition().getY(), 24 * getgW().TILE_SCALE, 24 * getgW().TILE_SCALE, null);
                 } else {
-                    g2d.drawImage(sprites[getFacing() + 2][getSpriteWalkId()], getScreenPosition().getX(), getScreenPosition().getY(), 32 * getgW().TILE_SCALE, 32 * getgW().TILE_SCALE, null);
+                    g2d.drawImage(sprites[getFacing() + 2][Math.clamp(getSpriteWalkId(), 0, 4)], getScreenPosition().getX(), getScreenPosition().getY(), 24 * getgW().TILE_SCALE, 24 * getgW().TILE_SCALE, null);
                 }
             }
             getgW().util.drawDebugRect(g2d, getHitBox());
@@ -204,7 +217,7 @@ public class DolphinEnemy extends Enemy{
     }
 
     public void loadSprites(String spritePath){
-        sprites = getgW().util.loadGraphic2D(spritePath, 32);
+        sprites = getgW().util.loadGraphic2D(spritePath, 24);
     }
 
     public int getSpriteWalkFrame() {
@@ -263,24 +276,18 @@ public class DolphinEnemy extends Enemy{
         this.movingLeft = movingLeft;
     }
 
-    public boolean isShooting() {
-        return shooting;
+    public void setCanJump(boolean canJump) {
+        this.canJump = canJump;
     }
 
-    public void setShooting(boolean shooting) {
-        this.shooting = shooting;
+
+    public void setJumping(boolean jumping) {
+        this.jumping = jumping;
     }
 
-    public int getShootFrame() {
-        return shootFrame;
-    }
 
-    public void setShootFrame(int shootFrame) {
-        this.shootFrame = shootFrame;
-    }
-
-    public int getMAX_SHOOT_FRAME() {
-        return MAX_SHOOT_FRAME;
+    public void setJumpToPlayerFacing(int jumpToPlayerFacing) {
+        this.jumpToPlayerFacing = jumpToPlayerFacing;
     }
 
     public int getMAX_INVINCIBILITY_FRAME() {
@@ -301,5 +308,13 @@ public class DolphinEnemy extends Enemy{
 
     public void setHp(int hp) {
         this.hp = hp;
+    }
+
+    public int getCurrentState() {
+        return currentState;
+    }
+
+    public void setCurrentState(int currentState) {
+        this.currentState = currentState;
     }
 }
