@@ -7,7 +7,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class PenguinEnemy extends Enemy{
-    BufferedImage[][] sprites;
+    private static BufferedImage[][] sprites;
 
     private int spriteWalkFrame = 0;
     private int spriteWalkId = 0;
@@ -32,35 +32,39 @@ public class PenguinEnemy extends Enemy{
 
     private int currentState = 0;
 
-    public PenguinEnemy(GameWindow gW, Vector2 worldPos, String spritePath){
+    public PenguinEnemy(GameWindow gW, Vector2 worldPos, String spritePath, int element){
         super(gW, worldPos);
+        setElement(element);
         loadSprites(spritePath);
         setNotActiveWorldPos(new Vector2(worldPos));
-        setScreenPosition(gW.util.worldPosToScreenPos(worldPos));
+        setScreenPosition(gW.getUtil().worldPosToScreenPos(worldPos));
         setHitBox(new Rectangle(worldPos.getX() + 27, worldPos.getY() + 3,24 * gW.TILE_SCALE - 15 * gW.TILE_SCALE, 24 * gW.TILE_SCALE - 2 * gW.TILE_SCALE ));
         setNotActiveHitBoxWorldPos(new Vector2(getHitBox().x, getHitBox().y));
         setActive(false);
+        setMovingLeft(true);
         setDead(false);
     }
 
     @Override
     public void process(){
-        if (getgW().util.isRectOnScreen(getHitBox()) && !isActive() && !isDead()){
+        if (getgW().getUtil().isRectOnScreen(getHitBox()) && !isActive() && !isDead()){
             setActive(true);
-        } else if (!getgW().util.isRectOnScreen(getHitBox()) && isDead()){
+        } else if ((!getgW().getUtil().isRectOnScreen(getHitBox()) && isDead()) || !getgW().getUtil().isRectOnScreenPartial(getHitBox())){
             setDead(false);
             setActive(false);
         }
         if (!isDead() && isActive()){
-            setInAttackRange(getWorldPosition().distanceTo(getgW().player.getWorldPosition()) <= 456);
+            setInAttackRange(getWorldPosition().distanceTo(getgW().getPlayer().getWorldPosition()) <= 672);
             // walking state
             if (getCurrentState() == 0){
                 setCanJump(false);
-                if (isMovingLeft() && (!getgW().tileManager.isTileBlocking(getHitBox().x - 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset()) || getgW().tileManager.isTileBlocking(getHitBox().x - getCollisionCheckTileOffset(), getHitBox().y))){
-                    setMovingLeft(false);
-                } else if (!isMovingLeft() && (!getgW().tileManager.isTileBlocking(getHitBox().x + getHitBox().width + 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset()) || getgW().tileManager.isTileBlocking(getHitBox().x + getHitBox().width + getCollisionCheckTileOffset(), getHitBox().y))){
-                    setMovingLeft(true);
-                }
+                if (isMovingLeft() && (!(getgW().getTileManager().isTileBlocking(getHitBox().x - 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset() + 12))
+                    || getgW().getTileManager().isTileBlocking(getHitBox().x - getCollisionCheckTileOffset() - 4, (int)getHitBox().getCenterY()))){
+                setMovingLeft(false);
+            } else if (!isMovingLeft() && (!getgW().getTileManager().isTileBlocking(getHitBox().x + getHitBox().width + 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset() + 12)
+                    || getgW().getTileManager().isTileBlocking(getHitBox().x + getHitBox().width + getCollisionCheckTileOffset() + 4, (int)getHitBox().getCenterY()))){
+                setMovingLeft(true);
+            }
                 if (!isMovingLeft()){
                     getVelocity().setX(4);
                     setFacing(1);
@@ -76,7 +80,7 @@ public class PenguinEnemy extends Enemy{
                 }
                 if (isInAttackRange()){
                     changeStateTo(1);
-                    if (getgW().player.getWorldPosition().getX() <= getWorldPosition().getX()){
+                    if (getgW().getPlayer().getWorldPosition().getX() <= getWorldPosition().getX()){
                         setFacing(0);
                         setMovingLeft(true);
                     } else {
@@ -114,19 +118,21 @@ public class PenguinEnemy extends Enemy{
             invincibilityCheck();
             applyVelocity();
             animateSprite();
-            setScreenPosition(getgW().util.worldPosToScreenPos(getWorldPosition()));
+            setScreenPosition(getgW().getUtil().worldPosToScreenPos(getWorldPosition()));
             checkCollisionWithPlayer();
+            checkDangerTileToApplyDamage();
         } else {
             // respawn
             changeStateTo(0);
+            setInvincibilityFrame(0);
             setInvincible(false);
             invincibilityCheck();
-            setMovingLeft(getgW().player.getWorldPosition().getX() <= getWorldPosition().getX());
+            setMovingLeft(getgW().getPlayer().getWorldPosition().getX() <= getWorldPosition().getX());
             setWorldPosition(new Vector2(getNotActiveWorldPos()));
             getHitBox().x = getNotActiveHitBoxWorldPos().getX();
             getHitBox().y = getNotActiveHitBoxWorldPos().getY();
             setVelocity(new Vector2(0, 0));
-            setScreenPosition(getgW().util.worldPosToScreenPos(getWorldPosition()));
+            setScreenPosition(getgW().getUtil().worldPosToScreenPos(getWorldPosition()));
             setHp(3);
         }
     }
@@ -176,7 +182,7 @@ public class PenguinEnemy extends Enemy{
         getVelocity().setX(0);
         getVelocity().setY(0);
         if (!falling){
-            if (getgW().player.getWorldPosition().getX() <= getWorldPosition().getX()){
+            if (getgW().getPlayer().getWorldPosition().getX() <= getWorldPosition().getX()){
                 setJumpToPlayerFacing(-1);
                 setMovingLeft(true);
             } else {
@@ -187,16 +193,21 @@ public class PenguinEnemy extends Enemy{
     }
 
     @Override
-    public void onHit(Vector2 hitPos){
+    public void onHit(Vector2 hitPos, int element){
         if (!isInvincible()){
-            setHp(getHp() - 1);
+            int adv = checkElementAdvantage(element);
+            if (adv == 1){
+                setHp(getHp() - 2);
+            } else if (adv == 0){
+                setHp(getHp() - 1);
+            }
             setInvincible(true);
             if (getHp() <= 0){
                 if (!isRespawnable()){
-                    getgW().entitiesToDelete.add(this);
+                    getgW().getEntitiesToDelete().add(this);
                 }
                 setDead(true);
-                getgW().effects.add(getgW().enemyFactory.getEnemy(-1, new Vector2(getWorldPosition())));
+                getgW().getEffects().add(getgW().getEnemyFactory().getEnemy(-1, new Vector2(getWorldPosition())));
             }
         }
     }
@@ -213,6 +224,28 @@ public class PenguinEnemy extends Enemy{
         }
     }
 
+    public void checkDangerTileToApplyDamage(){
+        if (getgW().getTileManager().isTileDangerous(getHitBox().x, getHitBox().y)
+                || getgW().getTileManager().isTileDangerous(getHitBox().x + getHitBox().width, getHitBox().y)
+                || getgW().getTileManager().isTileDangerous(getHitBox().x, getHitBox().y + getHitBox().height)
+                || getgW().getTileManager().isTileDangerous(getHitBox().x + getHitBox().width, getHitBox().y + getHitBox().height)){
+            if (getHp() > 0){
+                applyDirectDamage(getHp());
+            }
+        }
+    }
+
+    public void applyDirectDamage(int damage){
+        setHp(getHp() - damage);
+        if (getHp() <= 0){
+            if (!isRespawnable()){
+                getgW().getEntitiesToDelete().add(this);
+            }
+            setDead(true);
+            getgW().getEffects().add(getgW().getEnemyFactory().getEnemy(-1, new Vector2(getWorldPosition())));
+        }
+    }
+
     @Override
     public void render(Graphics2D g2d){
         if (!isDead() && isActive()){
@@ -223,12 +256,14 @@ public class PenguinEnemy extends Enemy{
                     g2d.drawImage(sprites[getFacing() + 2][Math.clamp(getSpriteWalkId(), 0, 4)], getScreenPosition().getX(), getScreenPosition().getY(), 24 * getgW().TILE_SCALE, 24 * getgW().TILE_SCALE, null);
                 }
             }
-            getgW().util.drawDebugRect(g2d, getHitBox());
+            getgW().getUtil().drawDebugRect(g2d, getHitBox());
         }
     }
 
     public void loadSprites(String spritePath){
-        sprites = getgW().util.loadGraphic2D(spritePath, 24);
+        if (sprites == null){
+            sprites = getgW().getUtil().loadGraphic2D(spritePath, 24);
+        }
     }
 
     public int getSpriteWalkFrame() {

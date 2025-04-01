@@ -29,7 +29,6 @@ public abstract class Entity {
 
     }
 
-
     public Vector2 getWorldPosition() {
         return worldPosition;
     }

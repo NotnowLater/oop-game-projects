@@ -17,7 +17,7 @@ public class ExplosionEnemy extends Enemy{
     public ExplosionEnemy(GameWindow gW, Vector2 worldPos, String spritePath){
         super(gW, worldPos);
         loadSprites(spritePath);
-        setScreenPosition(gW.util.worldPosToScreenPos(worldPos));
+        setScreenPosition(gW.getUtil().worldPosToScreenPos(worldPos));
 //        hitBox = new Rectangle(worldPos.x + 12, worldPos.y + 18,24 * gW.TILE_SCALE - 8 * gW.TILE_SCALE, 24 * gW.TILE_SCALE - 7 * gW.TILE_SCALE );
         setActive(false);
         setDead(false);
@@ -25,12 +25,12 @@ public class ExplosionEnemy extends Enemy{
 
     @Override
     public void process(){
-        setScreenPosition(getgW().util.worldPosToScreenPos(getWorldPosition()));
+        setScreenPosition(getgW().getUtil().worldPosToScreenPos(getWorldPosition()));
         if (animFrame >= MAX_ANIM_FRAME){
             currentFrame++;
             animFrame = 0;
             if (currentFrame >= sprites.length){
-                getgW().entitiesToDelete.add(this);
+                getgW().getEntitiesToDelete().add(this);
             }
         } else {
             animFrame ++;
@@ -44,6 +44,6 @@ public class ExplosionEnemy extends Enemy{
 
     @Override
     public void loadSprites(String spritePath){
-        sprites = getgW().util.loadGraphic1D(spritePath, 24);
+        sprites = getgW().getUtil().loadGraphic1D(spritePath, 24);
     }
 }

@@ -30,8 +30,8 @@ public class WhaleBossEnemy extends Enemy{
         super(gW, worldPos);
         loadSprites(spritePath);
         setNotActiveWorldPos(new Vector2(worldPos));
-        setScreenPosition(gW.util.worldPosToScreenPos(worldPos));
-        setHitBox(new Rectangle(worldPos.getX() + 156, worldPos.getY() + 240,208 * gW.TILE_SCALE - 83 * gW.TILE_SCALE, 208 * gW.TILE_SCALE - 130 * gW.TILE_SCALE ));
+        setScreenPosition(gW.getUtil().worldPosToScreenPos(worldPos));
+        setHitBox(new Rectangle(worldPos.getX() + 156, worldPos.getY() + 240,176 * gW.TILE_SCALE - 83 * gW.TILE_SCALE, 176 * gW.TILE_SCALE - 130 * gW.TILE_SCALE ));
         setNotActiveHitBoxWorldPos(new Vector2(getHitBox().x, getHitBox().y));
         setActive(true);
         setDead(false);
@@ -39,7 +39,7 @@ public class WhaleBossEnemy extends Enemy{
 
     @Override
     public void process() {
-        setInAttackRange(getWorldPosition().distanceTo(getgW().player.getWorldPosition()) <= 528);
+        setInAttackRange(getWorldPosition().distanceTo(getgW().getPlayer().getWorldPosition()) <= 528);
         // pick which action to do next after idle
         if (getCurrentState() == 0 && idleDone >= 2 && isInAttackRange()){
             setIdleDone(0);
@@ -75,7 +75,7 @@ public class WhaleBossEnemy extends Enemy{
             }
         }
         invincibilityCheck();
-        setScreenPosition(getgW().util.worldPosToScreenPos(getWorldPosition()));
+        setScreenPosition(getgW().getUtil().worldPosToScreenPos(getWorldPosition()));
         animateSprite();
         applyVelocity();
         checkCollisionWithPlayer();
@@ -85,9 +85,9 @@ public class WhaleBossEnemy extends Enemy{
     @Override
     public void render(Graphics2D g2d) {
         if (getInvincibilityFrame() % 2 == 0) {
-            g2d.drawImage(sprites[getSpriteActionId()][getSpriteWalkId()], getScreenPosition().getX(), getScreenPosition().getY(), 208 * getgW().TILE_SCALE, 208 * getgW().TILE_SCALE, null);
+            g2d.drawImage(sprites[getSpriteActionId()][getSpriteWalkId()], getScreenPosition().getX(), getScreenPosition().getY(), 176 * getgW().TILE_SCALE, 176 * getgW().TILE_SCALE, null);
         }
-        getgW().util.drawDebugRect(g2d, getHitBox());
+        getgW().getUtil().drawDebugRect(g2d, getHitBox());
     }
 
     @Override
@@ -164,10 +164,10 @@ public class WhaleBossEnemy extends Enemy{
             setHp(getHp() - 1);
             setInvincible(true);
             if (getHp() <= 0){
-                getgW().entitiesToDelete.add(this);
+                getgW().getEntitiesToDelete().add(this);
                 getgW().getViewportManager().setViewportFollowingAnchor(true);
                 setDead(true);
-                getgW().effects.add(getgW().enemyFactory.getEnemy(-1, new Vector2(getWorldPosition())));
+                getgW().getEffects().add(getgW().getEnemyFactory().getEnemy(-1, new Vector2(getWorldPosition())));
             }
         }
     }
@@ -188,29 +188,29 @@ public class WhaleBossEnemy extends Enemy{
         Projectile p = new DolphinProjectile(getgW(), new Vector2(getWorldPosition().getX() + 24 * getgW().TILE_SCALE, getWorldPosition().getY() + 135 * getgW().TILE_SCALE));
         p.setFacing(getFacing());
         p.getVelocity().setX(-16);
-        getgW().projectiles.add(p);
+        getgW().getProjectiles().add(p);
     }
 
     private void shootProjectile(){
         Projectile p = new WhaleBossProjectile(getgW(), new Vector2(getWorldPosition().getX() + 32 * getgW().TILE_SCALE, getWorldPosition().getY() + 135 * getgW().TILE_SCALE));
         p.setFacing(getFacing());
         p.getVelocity().setX(-12);
-        getgW().projectiles.add(p);
+        getgW().getProjectiles().add(p);
     }
 
     private void spawnEnemy(){
         Enemy e;
         if (getgW().getRng().nextInt(100) > 75){
-            e = getgW().enemyFactory.getEnemy(1, new Vector2(getWorldPosition().getX() + 12 * getgW().TILE_SCALE, getWorldPosition().getY() + 127 * getgW().TILE_SCALE));
+            e = getgW().getEnemyFactory().getEnemy(1, new Vector2(getWorldPosition().getX() + 12 * getgW().TILE_SCALE, getWorldPosition().getY() + 127 * getgW().TILE_SCALE));
         } else {
-            e = getgW().enemyFactory.getEnemy(2, new Vector2(getWorldPosition().getX() + 12 * getgW().TILE_SCALE, getWorldPosition().getY() + 127 * getgW().TILE_SCALE));
+            e = getgW().getEnemyFactory().getEnemy(2, new Vector2(getWorldPosition().getX() + 12 * getgW().TILE_SCALE, getWorldPosition().getY() + 127 * getgW().TILE_SCALE));
         }
         e.setRespawnable(false);
         getgW().addEnemyToSpawn(e);
     }
 
     public void loadSprites(String spritePath){
-        sprites = getgW().util.loadGraphic2D(spritePath, 208);
+        sprites = getgW().getUtil().loadGraphic2D(spritePath, 176);
     }
 
     public Vector2 getNotActiveWorldPos() {

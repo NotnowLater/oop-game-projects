@@ -50,6 +50,8 @@ public class Vector2 {
         return new Vector2(v.getX() - this.getX(), v.getY() - this.getY()).normalized();
     }
 
+
+
     @Override
     public String toString(){
         return "" + getX() + ", " + getY();

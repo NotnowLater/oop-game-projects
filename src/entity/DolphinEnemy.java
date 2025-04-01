@@ -7,7 +7,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class DolphinEnemy extends Enemy{
-    BufferedImage[][] sprites;
+    private static BufferedImage[][] sprites;
 
     private int spriteWalkFrame = 0;
     private int spriteWalkId = 0;
@@ -28,37 +28,41 @@ public class DolphinEnemy extends Enemy{
     private int invincibilityFrame = 0;
     private int hp = 3;
 
-    public DolphinEnemy(GameWindow gW, Vector2 worldPos, String spritePath){
+    public DolphinEnemy(GameWindow gW, Vector2 worldPos, String spritePath, int element){
         super(gW, worldPos);
         loadSprites(spritePath);
+        setElement(element);
         setNotActiveWorldPos(new Vector2(worldPos));
-        setScreenPosition(gW.util.worldPosToScreenPos(worldPos));
+        setScreenPosition(gW.getUtil().worldPosToScreenPos(worldPos));
         setHitBox(new Rectangle(worldPos.getX() + 27, worldPos.getY() + 3,32 * gW.TILE_SCALE - 15 * gW.TILE_SCALE, 32 * gW.TILE_SCALE - 2 * gW.TILE_SCALE ));
         setNotActiveHitBoxWorldPos(new Vector2(getHitBox().x, getHitBox().y));
         setActive(false);
+        setMovingLeft(true);
         setDead(false);
     }
 
     @Override
     public void process(){
         // spawn when on screen
-        if (getgW().util.isRectOnScreen(getHitBox()) && !isActive() && !isDead()){
+        if (getgW().getUtil().isRectOnScreen(getHitBox()) && !isActive() && !isDead()){
             setActive(true);
         }
-        // respawn when off-screen
-        else if (!getgW().util.isRectOnScreen(getHitBox()) && isDead()){
+        // respawn/despawn when off-screen
+        else if ((!getgW().getUtil().isRectOnScreen(getHitBox()) && isDead()) || !getgW().getUtil().isRectOnScreenPartial(getHitBox())){
             setDead(false);
             setActive(false);
         }
         if (!isDead() && isActive()){
-            setInAttackRange(getWorldPosition().distanceTo(getgW().player.getWorldPosition()) <= 456);
+            setInAttackRange(getWorldPosition().distanceTo(getgW().getPlayer().getWorldPosition()) <= 456);
             if (!isInAttackRange()){
                 setShooting(false);
-                if (isMovingLeft() && (!getgW().tileManager.isTileBlocking(getHitBox().x - 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset()) || getgW().tileManager.isTileBlocking(getHitBox().x - getCollisionCheckTileOffset(), getHitBox().y))){
-                    setMovingLeft(false);
-                } else if (!isMovingLeft() && (!getgW().tileManager.isTileBlocking(getHitBox().x + getHitBox().width + 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset()) || getgW().tileManager.isTileBlocking(getHitBox().x + getHitBox().width + getCollisionCheckTileOffset(), getHitBox().y))){
-                    setMovingLeft(true);
-                }
+                if (isMovingLeft() && (!(getgW().getTileManager().isTileBlocking(getHitBox().x - 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset() + 12))
+                    || getgW().getTileManager().isTileBlocking(getHitBox().x - getCollisionCheckTileOffset() - 4, (int)getHitBox().getCenterY()))){
+                setMovingLeft(false);
+            } else if (!isMovingLeft() && (!getgW().getTileManager().isTileBlocking(getHitBox().x + getHitBox().width + 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset() + 12)
+                    || getgW().getTileManager().isTileBlocking(getHitBox().x + getHitBox().width + getCollisionCheckTileOffset() + 4, (int)getHitBox().getCenterY()))){
+                setMovingLeft(true);
+            }
                 if (!isMovingLeft()){
                     getVelocity().setX(4);
                     setFacing(1);
@@ -73,7 +77,7 @@ public class DolphinEnemy extends Enemy{
             } else {
                 // InPlayerRange
                 getVelocity().setX(0);
-                if (getgW().player.getWorldPosition().getX() > getWorldPosition().getX()){
+                if (getgW().getPlayer().getWorldPosition().getX() > getWorldPosition().getX()){
                     setFacing(1);
                     setMovingLeft(false);
                 } else {
@@ -91,18 +95,19 @@ public class DolphinEnemy extends Enemy{
             invincibilityCheck();
             applyVelocity();
             animateSprite();
-            setScreenPosition(getgW().util.worldPosToScreenPos(getWorldPosition()));
+            setScreenPosition(getgW().getUtil().worldPosToScreenPos(getWorldPosition()));
             checkCollisionWithPlayer();
         } else {
             // respawn
+            setInvincibilityFrame(0);
             setInvincible(false);
             invincibilityCheck();
-            setMovingLeft(getgW().player.getWorldPosition().getX() <= getWorldPosition().getX());
+            setMovingLeft(getgW().getPlayer().getWorldPosition().getX() <= getWorldPosition().getX());
             setWorldPosition(new Vector2(getNotActiveWorldPos()));
             getHitBox().x = getNotActiveHitBoxWorldPos().getX();
             getHitBox().y = getNotActiveHitBoxWorldPos().getY();
             setVelocity(new Vector2(0, 0));
-            setScreenPosition(getgW().util.worldPosToScreenPos(getWorldPosition()));
+            setScreenPosition(getgW().getUtil().worldPosToScreenPos(getWorldPosition()));
             setHp(3);
         }
     }
@@ -159,20 +164,25 @@ public class DolphinEnemy extends Enemy{
         if (getFacing() == 0){
             p.getVelocity().setX(p.getVelocity().getX() * -1);
         }
-        getgW().projectiles.add(p);
+        getgW().getProjectiles().add(p);
     }
 
     @Override
-    public void onHit(Vector2 hitPos){
+    public void onHit(Vector2 hitPos, int element){
         if (!isInvincible()){
-            setHp(getHp() - 1);
+            int adv = checkElementAdvantage(element);
+            if (adv == 1){
+                setHp(getHp() - 2);
+            } else if (adv == 0){
+                setHp(getHp() - 1);
+            }
             setInvincible(true);
             if (getHp() <= 0){
                 if (!isRespawnable()){
-                    getgW().entitiesToDelete.add(this);
+                    getgW().getEntitiesToDelete().add(this);
                 }
                 setDead(true);
-                getgW().effects.add(getgW().enemyFactory.getEnemy(-1, new Vector2(getWorldPosition())));
+                getgW().getEffects().add(getgW().getEnemyFactory().getEnemy(-1, new Vector2(getWorldPosition())));
             }
         }
     }
@@ -199,12 +209,14 @@ public class DolphinEnemy extends Enemy{
                     g2d.drawImage(sprites[getFacing() + 2][getSpriteWalkId()], getScreenPosition().getX(), getScreenPosition().getY(), 32 * getgW().TILE_SCALE, 32 * getgW().TILE_SCALE, null);
                 }
             }
-            getgW().util.drawDebugRect(g2d, getHitBox());
+            getgW().getUtil().drawDebugRect(g2d, getHitBox());
         }
     }
 
     public void loadSprites(String spritePath){
-        sprites = getgW().util.loadGraphic2D(spritePath, 32);
+        if (sprites == null) {
+            sprites = getgW().getUtil().loadGraphic2D(spritePath, 32);
+        }
     }
 
     public int getSpriteWalkFrame() {

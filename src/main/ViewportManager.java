@@ -36,6 +36,7 @@ public class ViewportManager implements Processable{
                 setViewportPositionFromCenterRelative(getViewportFollowCenterAnchor());
             }
             // else, slowly move the viewport to anchor
+            // never mind, this code sucks...
             else {
                 Vector2 dir = new Vector2();
                 if (getViewportCurrentCenter().getX() < getViewportFollowCenterAnchor().getX()){

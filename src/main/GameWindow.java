@@ -5,7 +5,6 @@ import tilemap.TileManager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -17,41 +16,54 @@ public class GameWindow extends JPanel implements Runnable {
     public final int TILE_SCALE = 3;   // tile scale
     // Game Standard Tile Size
     // DO NOT CHANGE!!!
-    public int RENDER_TILE_SIZE = TILE_SIZE * TILE_SCALE;    // render tile size
+    public final int RENDER_TILE_SIZE = TILE_SIZE * TILE_SCALE;    // render tile size
     public final int SCREEN_TILE_WIDTH = 24;   // max tile on screen width
     public final int SCREEN_TILE_HEIGHT = 14;  // max tile on screen height
     public final int SCREEN_WIDTH = SCREEN_TILE_WIDTH * RENDER_TILE_SIZE; // actual screen pixel width
     public final int SCREEN_HEIGHT = SCREEN_TILE_HEIGHT * RENDER_TILE_SIZE;  // actual screen pixel height
 
-    final int GAME_MAX_FPS = 60;
-    final int GAME_MAX_UPS = 60;
-    Thread gameThread;
+    private final int GAME_MAX_FPS = 60;
+    private Thread gameThread;
 
     private Random rng = new Random(System.currentTimeMillis());
-    public Util util = new Util(this);
-    public TileManager tileManager = new TileManager(this);
-    public KeyInputHandler keyInputHandler = new KeyInputHandler(this);
-    public HUDManager hudManager = new HUDManager(this);
+    private Util util = new Util(this);
+//    private TileManager tileManager = new TileManager(this);
+    private KeyInputHandler keyInputHandler = new KeyInputHandler(this);
+    private HUDManager hudManager = new HUDManager(this);
+    private SoundManager soundManager = new SoundManager();
 
     private Vector2 viewportPosition = new Vector2(0, 0);
     private ViewportManager viewportManager = new ViewportManager(this);
 
-    public Player player = new Player(this, new Vector2(780, 1402));
+//    private Player player;
 //    public Player player = new Player(this, new Vector2(18571, 602));
 
-    public EnemyFactory enemyFactory = new EnemyFactory(this);
+    private EnemyFactory enemyFactory = new EnemyFactory(this);
 
-    public List<Entity> entitiesToDelete = new ArrayList<Entity>();
-    public List<Projectile> projectiles = new ArrayList<Projectile>();
-    public List<Enemy> enemies = new ArrayList<Enemy>();
-    private List<Enemy> enemyToSpawn = new ArrayList<Enemy>();
-    public List<Enemy> effects = new ArrayList<Enemy>();
+    // 0 main menu
+    // 1 level
+    private int currentGameState = 0;
 
-    public  GameWindow(){
+    private MainMenu mainMenu = new MainMenu(this);
+    private LevelSelect levelSelect = new LevelSelect(this);
+    private WinScreen winScreen = new WinScreen(this);
+    private PasswordScreen passwordScreen = new PasswordScreen(this);
+    private EndScreen endScreen = new EndScreen(this);
+
+    private boolean debugEnable = false;
+
+    private LevelData currentLevel;
+    private LevelData level1 = new Level1(this, "water");
+    private LevelData level2 = new Level2(this, "fire");
+    private LevelData level3 = new Level3(this, "grass"); //dew
+    private LevelData level4 = new Level4(this, "dark");
+
+    public  GameWindow(JFrame frame){
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         this.setBackground(new Color(10, 10, 10));
         this.setDoubleBuffered(true);   // prevent screen tearing
-        this.addKeyListener(keyInputHandler);
+        this.addKeyListener(getKeyInputHandler());
+        frame.setIconImage(getUtil().loadGraphic("sprites/icon.png"));
         this.setFocusable(true);
     }
 
@@ -62,124 +74,135 @@ public class GameWindow extends JPanel implements Runnable {
     }
 
     public void initGame(){
-//        player.setWorldPosition(new Vector2(18571, 602));
-        enemies.add(enemyFactory.getEnemy(3,new Vector2(19585, 828)));
-        enemies.add(new PlayerAreaCameraAxisLockTrigger(this, new Vector2(19200, 1455), new Vector2(2560, 48)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(1440, 1356)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(1680, 1356)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(1920, 1356)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(3264, 1356)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(7296, 2076)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(10176, 1404)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(13920, 1308)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(17376, 540)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(17952, 588)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(18528, 540)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(19104, 588)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(15408, 1356)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(8400, 2076)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(8208, 2076)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(15696, 780)));
-//        enemies.add(enemyFactory.getEnemy(0, new Vector2(15888, 780)));
 
-        enemies.add(enemyFactory.getEnemy(4, new Vector2(1440, 1356)));
-        enemies.add(enemyFactory.getEnemy(4, new Vector2(9504, 1596)));
-        enemies.add(enemyFactory.getEnemy(4, new Vector2(15936, 1164)));
-        enemies.add(enemyFactory.getEnemy(4, new Vector2(16848, 684)));
-        enemies.add(enemyFactory.getEnemy(4, new Vector2(5952, 1500)));
-        enemies.add(enemyFactory.getEnemy(4, new Vector2(3888, 1116)));
-        enemies.add(enemyFactory.getEnemy(4, new Vector2(12816, 1308)));
-        enemies.add(enemyFactory.getEnemy(4, new Vector2(14448, 972)));
 
-        enemies.add(enemyFactory.getEnemy(1, new Vector2(2928, 1392)));
-        enemies.add(enemyFactory.getEnemy(1, new Vector2(4704, 1392)));
-        enemies.add(enemyFactory.getEnemy(1, new Vector2(6096, 1488)));
-        enemies.add(enemyFactory.getEnemy(1, new Vector2(7440, 2064)));
-        enemies.add(enemyFactory.getEnemy(1, new Vector2(8304, 2064)));
+        getSoundManager().playBGM("main");
+//        setCurrentGameState(6);
+
     }
 
     @Override
     public void run() {
-        double drawFrameInterval = 1000000000 / GAME_MAX_FPS;
-        double processFrameInterval = 1000000000 / GAME_MAX_UPS;
+        double drawFrameInterval = 1000000000.0 / GAME_MAX_FPS;
         double drawDeltaTime = 0;
-        double updateDeltaTime = 0;
         long lastTime = System.nanoTime();
         long currTime;
-        long fpsTimer = 0;
-        // fps/ups
-        int frameCount = 0;
-        int updateCount = 0;
-
         while (gameThread != null){
             currTime = System.nanoTime();
-
             drawDeltaTime += (currTime - lastTime) / drawFrameInterval;
-            updateDeltaTime += (currTime - lastTime) / processFrameInterval;
-            fpsTimer += (currTime - lastTime);
             lastTime = currTime;
-            if (updateDeltaTime >= 1.0){
-                process();
-                updateDeltaTime--;
-                updateCount++;
-            }
             if (drawDeltaTime >= 1.0){
-//                process();
+                process();
                 repaint();
                 drawDeltaTime--;
-                frameCount++;
             }
-            if (fpsTimer >= 1000000000){
-//                System.out.println("FPS : " + frameCount + " UPS : " + updateCount);
-                frameCount = 0;
-                updateCount = 0;
-                fpsTimer = 0;
-            }
-
         }
     }
 
-    // Main game loop process
-    public void process(){
-        // spawn enemy
-        enemies.addAll(enemyToSpawn);
-        enemyToSpawn.clear();
-
-        viewportManager.process();
-        // process all entity
-        player.process();
-        for (Projectile p : projectiles){
-            p.process();
+    public synchronized void process(){
+        getKeyInputHandler().process();
+        switch (getCurrentGameState()) {
+            case 0:
+                getMainMenu().process();
+                break;
+            case 1:
+                getLevelSelect().process();
+                break;
+            case 2:
+                // animate the tileset
+                getTileManager().process();
+                getViewportManager().process();
+                // process all entity
+                getPlayer().process();
+                for (Projectile p : getProjectiles()) {
+                    p.process();
+                }
+                for (Enemy e : getEnemies()) {
+                    e.process();
+                }
+                for (Entity ef : getEffects()) {
+                    ef.process();
+                }
+            case 3:
+                getHudManager().process();
+                break;
+            case 4:
+                getWinScreen().process();
+                break;
+            case 5:
+                getPasswordScreen().process();
+                break;
+            case 6:
+                getEndScreen().process();
+                break;
         }
-        for (Enemy e : enemies){
-            e.process();
-        }
-        for (Enemy ef : effects){
-            ef.process();
-        }
-        // delete entities
-        projectiles.removeAll(entitiesToDelete);
-        enemies.removeAll(entitiesToDelete);
-        effects.removeAll(entitiesToDelete);
+        getKeyInputHandler().process();
     }
-    // Main game Render
-    public void paintComponent(Graphics g){
+
+    public synchronized void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D)g;
-//        util.setGraphic2D(g2d);
         // render start
-        tileManager.render(g2d);
-        player.render(g2d);
-        for (Enemy e : enemies){
-            e.render(g2d);
+        switch (getCurrentGameState()) {
+            case 0:
+                getMainMenu().render(g2d);
+                break;
+            case 1:
+                getLevelSelect().render(g2d);
+                break;
+            case 2:
+                // spawn enemy
+                getEnemies().addAll(getEnemyToSpawn());
+                getEnemyToSpawn().clear();
+                // delete entities
+                getProjectiles().removeAll(getEntitiesToDelete());
+                getEnemies().removeAll(getEntitiesToDelete());
+                getEffects().removeAll(getEntitiesToDelete());
+                getTileManager().render(g2d);
+                getPlayer().render(g2d);
+                for (Enemy e : getEnemies()) {
+                    e.render(g2d);
+                }
+                for (Entity ef : getEffects()) {
+                    ef.render(g2d);
+                }
+                for (Projectile p : getProjectiles()) {
+                    p.render(g2d);
+                }
+                getHudManager().render(g2d);
+                break;
+            case 3:
+                // spawn enemy
+                getEnemies().addAll(getEnemyToSpawn());
+                getEnemyToSpawn().clear();
+                // delete entities
+                getProjectiles().removeAll(getEntitiesToDelete());
+                getEnemies().removeAll(getEntitiesToDelete());
+                getEffects().removeAll(getEntitiesToDelete());
+
+                getTileManager().render(g2d);
+                getPlayer().render(g2d);
+                for (Enemy e : getEnemies()) {
+                    e.render(g2d);
+                }
+                for (Entity ef : getEffects()) {
+                    ef.render(g2d);
+                }
+                for (Projectile p : getProjectiles()) {
+                    p.render(g2d);
+                }
+                getHudManager().render(g2d);
+                break;
+            case 4:
+                getWinScreen().render(g2d);
+                break;
+            case 5:
+                getPasswordScreen().render(g2d);
+                break;
+            case 6:
+                getEndScreen().render(g2d);
+                break;
         }
-        for (Enemy ef : effects){
-            ef.render(g2d);
-        }
-        for (Projectile p : projectiles){
-            p.render(g2d);
-        }
-        hudManager.render(g2d);
         // render end
         g2d.dispose();
     }
@@ -188,8 +211,14 @@ public class GameWindow extends JPanel implements Runnable {
         return rng;
     }
 
+    public void changeBGColorTo(Color newColor){
+        if (newColor.getRGB() != getBackground().getRGB()){
+            setBackground(newColor);
+        }
+    }
+
     public void addEnemyToSpawn(Enemy e){
-        enemyToSpawn.add(e);
+        getEnemyToSpawn().add(e);
     }
 
     public Vector2 getViewportPosition() {
@@ -202,5 +231,197 @@ public class GameWindow extends JPanel implements Runnable {
 
     public ViewportManager getViewportManager() {
         return viewportManager;
+    }
+
+    public int getCurrentGameState() {
+        return currentGameState;
+    }
+
+    public void setCurrentGameState(int currentGameState) {
+        this.currentGameState = currentGameState;
+    }
+
+    public SoundManager getSoundManager() {
+        return soundManager;
+    }
+
+    public void setSoundManager(SoundManager soundManager) {
+        this.soundManager = soundManager;
+    }
+
+    public Player getPlayer() {
+        return currentLevel.getPlayer();
+    }
+
+    public void setPlayer(Player player) {
+        currentLevel.setPlayer(player);
+    }
+
+    public TileManager getTileManager() {
+        return getCurrentLevel().getTileManager();
+    }
+
+    public void setTileManager(TileManager tileManager) {
+        getCurrentLevel().setTileManager(tileManager);
+    }
+
+    public List<Entity> getEntitiesToDelete() {
+        return getCurrentLevel().getEntitiesToDelete();
+    }
+
+    public void setEntitiesToDelete(List<Entity> entitiesToDelete) {
+        getCurrentLevel().setEntitiesToDelete(entitiesToDelete);
+    }
+
+    public List<Projectile> getProjectiles() {
+        return getCurrentLevel().getProjectiles();
+    }
+
+    public void setProjectiles(List<Projectile> projectiles) {
+        getCurrentLevel().setProjectiles(projectiles);
+    }
+
+    public List<Enemy> getEnemies() {
+        return getCurrentLevel().getEnemies();
+    }
+
+    public void setEnemies(List<Enemy> enemies) {
+        getCurrentLevel().setEnemies(enemies);
+    }
+
+    public List<Enemy> getEnemyToSpawn() {
+        return getCurrentLevel().getEnemyToSpawn();
+    }
+
+    public void setEnemyToSpawn(List<Enemy> enemyToSpawn) {
+        getCurrentLevel().setEnemyToSpawn(enemyToSpawn);
+    }
+
+    public List<Entity> getEffects() {
+        return getCurrentLevel().getEffects();
+    }
+
+    public void setEffects(List<Entity> effects) {
+        getCurrentLevel().setEffects(effects);
+    }
+
+    public LevelSelect getLevelSelect() {
+        return levelSelect;
+    }
+
+    public void setLevelSelect(LevelSelect levelSelect) {
+        this.levelSelect = levelSelect;
+    }
+
+    public LevelData getCurrentLevel() {
+        return currentLevel;
+    }
+
+    public void setCurrentLevel(LevelData currentLevel) {
+        this.currentLevel = currentLevel;
+    }
+
+    public boolean isDebugEnable() {
+        return debugEnable;
+    }
+
+    public void setDebugEnable(boolean debugEnable) {
+        this.debugEnable = debugEnable;
+    }
+
+    public Util getUtil() {
+        return util;
+    }
+
+    public void setUtil(Util util) {
+        this.util = util;
+    }
+
+    public KeyInputHandler getKeyInputHandler() {
+        return keyInputHandler;
+    }
+
+    public void setKeyInputHandler(KeyInputHandler keyInputHandler) {
+        this.keyInputHandler = keyInputHandler;
+    }
+
+    public HUDManager getHudManager() {
+        return hudManager;
+    }
+
+    public void setHudManager(HUDManager hudManager) {
+        this.hudManager = hudManager;
+    }
+
+    public EnemyFactory getEnemyFactory() {
+        return enemyFactory;
+    }
+
+    public void setEnemyFactory(EnemyFactory enemyFactory) {
+        this.enemyFactory = enemyFactory;
+    }
+
+    public LevelData getLevel1() {
+        return level1;
+    }
+
+    public void setLevel1(LevelData level1) {
+        this.level1 = level1;
+    }
+
+    public LevelData getLevel2() {
+        return level2;
+    }
+
+    public void setLevel2(LevelData level2) {
+        this.level2 = level2;
+    }
+
+    public LevelData getLevel3() {
+        return level3;
+    }
+
+    public void setLevel3(LevelData level3) {
+        this.level3 = level3;
+    }
+
+    public LevelData getLevel4() {
+        return level4;
+    }
+
+    public void setLevel4(LevelData level4) {
+        this.level4 = level4;
+    }
+
+    public MainMenu getMainMenu() {
+        return mainMenu;
+    }
+
+    public void setMainMenu(MainMenu mainMenu) {
+        this.mainMenu = mainMenu;
+    }
+
+    public WinScreen getWinScreen() {
+        return winScreen;
+    }
+
+    public void setWinScreen(WinScreen winScreen) {
+        this.winScreen = winScreen;
+    }
+
+    public PasswordScreen getPasswordScreen() {
+        return passwordScreen;
+    }
+
+    public void setPasswordScreen(PasswordScreen passwordScreen) {
+        this.passwordScreen = passwordScreen;
+    }
+
+    public EndScreen getEndScreen() {
+        return endScreen;
+    }
+
+    public void setEndScreen(EndScreen endScreen) {
+        this.endScreen = endScreen;
     }
 }

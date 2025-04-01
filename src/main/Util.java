@@ -54,9 +54,12 @@ public class Util {
     }
 
     public void drawDebugRect(Graphics2D g2d, Rectangle rect){
-        g2d.setColor(Color.GREEN);
-        Vector2 wp = worldPosToScreenPos(new Vector2(rect.x, rect.y));
-        g2d.drawRect(wp.getX(), wp.getY(), rect.width, rect.height);
+        if (gW.isDebugEnable()){
+//            System.out.println("here");
+            g2d.setColor(Color.GREEN);
+            Vector2 wp = worldPosToScreenPos(new Vector2(rect.x, rect.y));
+            g2d.drawRect(wp.getX(), wp.getY(), rect.width, rect.height);
+        }
     }
 
     public BufferedImage[][] loadGraphic2D(String spritePath, int TileSize){
@@ -75,6 +78,22 @@ public class Util {
         return null;
     }
 
+    public BufferedImage[][] loadGraphic2D(String spritePath, Vector2 TileSize){
+        try{
+            BufferedImage full = ImageIO.read(getClass().getClassLoader().getResourceAsStream(spritePath));
+            BufferedImage[][] sprites = new BufferedImage[full.getHeight() / TileSize.getY()][full.getWidth() / TileSize.getX()];
+            for (int i = 0; i < full.getHeight() / TileSize.getY(); i++) {
+                for (int j = 0; j < full.getWidth() / TileSize.getX(); j++) {
+                    sprites[i][j] = full.getSubimage(j * TileSize.getX(), i * TileSize.getY(), TileSize.getX(), TileSize.getY());
+                }
+            }
+            return sprites;
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public BufferedImage[] loadGraphic1D(String spritePath, int TileSize){
         try{
             BufferedImage full = ImageIO.read(getClass().getClassLoader().getResourceAsStream(spritePath));
@@ -83,6 +102,30 @@ public class Util {
                 sprites[i] = full.getSubimage(i * TileSize, 0, TileSize, TileSize);
             }
             return sprites;
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public BufferedImage[] loadGraphic1D(String spritePath, Vector2 TileSize){
+        try{
+            BufferedImage full = ImageIO.read(getClass().getClassLoader().getResourceAsStream(spritePath));
+            BufferedImage[] sprites = new BufferedImage[full.getWidth() / TileSize.getX()];
+            for (int i = 0; i < full.getWidth() / TileSize.getX(); i++) {
+                sprites[i] = full.getSubimage(i * TileSize.getX(), 0, TileSize.getX(), TileSize.getY());
+            }
+            return sprites;
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public BufferedImage loadGraphic(String spritePath){
+        try{
+            BufferedImage full = ImageIO.read(getClass().getClassLoader().getResourceAsStream(spritePath));
+            return full;
         } catch (Exception e){
             e.printStackTrace();
         }

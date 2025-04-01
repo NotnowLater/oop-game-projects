@@ -8,7 +8,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class BlueEnemy extends Enemy{
-    BufferedImage[][] sprites;
+    static BufferedImage[][] sprites;
 
     private int spriteWalkFrame = 0;
     private int spriteWalkId = 0;
@@ -19,29 +19,33 @@ public class BlueEnemy extends Enemy{
     private Vector2 notActiveWorldPos;
     private Vector2 notActiveHitBoxWorldPos;
 
-    public BlueEnemy(GameWindow gW, Vector2 worldPos, String spritePath){
+    public BlueEnemy(GameWindow gW, Vector2 worldPos, String spritePath, int element){
         super(gW, worldPos);
         loadSprites(spritePath);
+        setElement(element);
         setNotActiveWorldPos(new Vector2(worldPos));
-        setScreenPosition(gW.util.worldPosToScreenPos(worldPos));
+        setScreenPosition(gW.getUtil().worldPosToScreenPos(worldPos));
         setHitBox(new Rectangle(worldPos.getX() + 12, worldPos.getY() + 18,24 * gW.TILE_SCALE - 8 * gW.TILE_SCALE, 24 * gW.TILE_SCALE - 7 * gW.TILE_SCALE ));
         setNotActiveHitBoxWorldPos(new Vector2(getHitBox().x, getHitBox().y));
         setActive(false);
+        setMovingLeft(true);
         setDead(false);
     }
 
     @Override
     public void process(){
-        if (getgW().util.isRectOnScreen(getHitBox()) && !isActive() && !isDead()){
+        if (getgW().getUtil().isRectOnScreen(getHitBox()) && !isActive() && !isDead()){
             setActive(true);
-        } else if (!getgW().util.isRectOnScreen(getHitBox()) && isDead()){
+        } else if ((!getgW().getUtil().isRectOnScreen(getHitBox()) && isDead()) || !getgW().getUtil().isRectOnScreenPartial(getHitBox())){
             setDead(false);
             setActive(false);
         }
         if (!isDead() && isActive()){
-            if (isMovingLeft() && (!getgW().tileManager.isTileBlocking(getHitBox().x - 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset()) || getgW().tileManager.isTileBlocking(getHitBox().x - getCollisionCheckTileOffset(), getHitBox().y))){
+            if (isMovingLeft() && (!(getgW().getTileManager().isTileBlocking(getHitBox().x - 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset() + 12))
+                    || getgW().getTileManager().isTileBlocking(getHitBox().x - getCollisionCheckTileOffset() - 4, (int)getHitBox().getCenterY()))){
                 setMovingLeft(false);
-            } else if (!isMovingLeft() && (!getgW().tileManager.isTileBlocking(getHitBox().x + getHitBox().width + 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset()) || getgW().tileManager.isTileBlocking(getHitBox().x + getHitBox().width + getCollisionCheckTileOffset(), getHitBox().y))){
+            } else if (!isMovingLeft() && (!getgW().getTileManager().isTileBlocking(getHitBox().x + getHitBox().width + 2, getHitBox().y + getHitBox().height + getCollisionCheckTileOffset() + 12)
+                    || getgW().getTileManager().isTileBlocking(getHitBox().x + getHitBox().width + getCollisionCheckTileOffset() + 4, (int)getHitBox().getCenterY()))){
                 setMovingLeft(true);
             }
             if (!isMovingLeft()){
@@ -56,15 +60,15 @@ public class BlueEnemy extends Enemy{
             }
             applyVelocity();
             animateSprite();
-            setScreenPosition(getgW().util.worldPosToScreenPos(getWorldPosition()));
+            setScreenPosition(getgW().getUtil().worldPosToScreenPos(getWorldPosition()));
             checkCollisionWithPlayer();
         } else {
-            setMovingLeft(getgW().player.getWorldPosition().getX() <= getWorldPosition().getX());
+            setMovingLeft(getWorldPosition().getX() > getgW().getPlayer().getWorldPosition().getX());
             setWorldPosition(new Vector2(getNotActiveWorldPos()));
             getHitBox().x = getNotActiveHitBoxWorldPos().getX();
             getHitBox().y = getNotActiveHitBoxWorldPos().getY();
             setVelocity(new Vector2(0, 0));
-            setScreenPosition(getgW().util.worldPosToScreenPos(getWorldPosition()));
+            setScreenPosition(getgW().getUtil().worldPosToScreenPos(getWorldPosition()));
         }
     }
 
@@ -72,7 +76,7 @@ public class BlueEnemy extends Enemy{
     public void render(Graphics2D g2d) {
         if (!isDead() && isActive()){
             g2d.drawImage(sprites[getFacing()][getSpriteWalkId()], getScreenPosition().getX(), getScreenPosition().getY(), 24 * getgW().TILE_SCALE, 24 * getgW().TILE_SCALE, null);
-            getgW().util.drawDebugRect(g2d, getHitBox());
+            getgW().getUtil().drawDebugRect(g2d, getHitBox());
         }
     }
 
@@ -96,26 +100,28 @@ public class BlueEnemy extends Enemy{
     }
 
     @Override
-    public void onHit(Vector2 hitPos){
+    public void onHit(Vector2 hitPos, int element){
         if (!isRespawnable()){
-            getgW().entitiesToDelete.add(this);
+            getgW().getEntitiesToDelete().add(this);
         }
         setDead(true);
-        getgW().effects.add(getgW().enemyFactory.getEnemy(-1, new Vector2(getWorldPosition())));
+        getgW().getEffects().add(getgW().getEnemyFactory().getEnemy(-1, new Vector2(getWorldPosition())));
     }
 
     @Override
     void loadSprites(String spritePath){
-        try{
-            BufferedImage full = ImageIO.read(getClass().getClassLoader().getResourceAsStream(spritePath));
-            sprites = new BufferedImage[full.getHeight() / 24][full.getWidth() / 24];
-            for (int i = 0; i < full.getHeight() / 24; i++) {
-                for (int j = 0; j < full.getWidth() / 24; j++) {
-                    sprites[i][j] = full.getSubimage(j * 24, i * 24, 24, 24);
+        if (sprites == null){
+            try{
+                BufferedImage full = ImageIO.read(getClass().getClassLoader().getResourceAsStream(spritePath));
+                sprites = new BufferedImage[full.getHeight() / 24][full.getWidth() / 24];
+                for (int i = 0; i < full.getHeight() / 24; i++) {
+                    for (int j = 0; j < full.getWidth() / 24; j++) {
+                        sprites[i][j] = full.getSubimage(j * 24, i * 24, 24, 24);
+                    }
                 }
+            } catch (Exception e){
+                e.printStackTrace();
             }
-        } catch (Exception e){
-            e.printStackTrace();
         }
     }
 

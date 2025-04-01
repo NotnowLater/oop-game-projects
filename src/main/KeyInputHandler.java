@@ -2,10 +2,20 @@ package main;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 
-public class KeyInputHandler implements KeyListener {
+public class KeyInputHandler implements KeyListener , Processable{
 
-    public  boolean upPressed, downPressed, leftPressed, rightPressed, confirm, cancel, menu;
+    public  boolean upPressed, downPressed, leftPressed, rightPressed, confirm, cancel, menu, quit;
+
+    public KeyJustPressedProcessor confirmJustPressed = new KeyJustPressedProcessor();
+    public KeyJustPressedProcessor cancelJustPressed = new KeyJustPressedProcessor();
+    public KeyJustPressedProcessor upJustPressed = new KeyJustPressedProcessor();
+    public KeyJustPressedProcessor downJustPressed = new KeyJustPressedProcessor();
+    public KeyJustPressedProcessor leftJustPressed = new KeyJustPressedProcessor();
+    public KeyJustPressedProcessor rightJustPressed = new KeyJustPressedProcessor();
+    public KeyJustPressedProcessor menuJustPressed = new KeyJustPressedProcessor();
+    public KeyJustPressedProcessor quitJustPressed = new KeyJustPressedProcessor();
 
     public GameWindow gW;
 
@@ -39,9 +49,15 @@ public class KeyInputHandler implements KeyListener {
         if (kc == KeyEvent.VK_X) {
             cancel = true;
         }
-        if (kc == KeyEvent.VK_X) {
-            gW.player.shoot();
+        if (kc == KeyEvent.VK_C){
+            menu = true;
         }
+        if (kc == KeyEvent.VK_Q){
+            quit = true;
+        }
+//        if (kc == KeyEvent.VK_X) {
+//            gW.player.shoot();
+//        }
 
     }
 
@@ -69,5 +85,38 @@ public class KeyInputHandler implements KeyListener {
         if (kc == KeyEvent.VK_SPACE){
             cancel = false;
         }
+        if (kc == KeyEvent.VK_C){
+            menu = false;
+        }
+        if (kc == KeyEvent.VK_Q){
+            quit = false;
+        }
+    }
+
+    @Override
+    public void process() {
+        confirmJustPressed.setPressed(confirm);
+        confirmJustPressed.process();
+
+        cancelJustPressed.setPressed(cancel);
+        cancelJustPressed.process();
+
+        upJustPressed.setPressed(upPressed);
+        upJustPressed.process();
+
+        downJustPressed.setPressed(downPressed);
+        downJustPressed.process();
+
+        leftJustPressed.setPressed(leftPressed);
+        leftJustPressed.process();
+
+        rightJustPressed.setPressed(rightPressed);
+        rightJustPressed.process();
+
+        menuJustPressed.setPressed(menu);
+        menuJustPressed.process();
+
+        quitJustPressed.setPressed(quit);
+        quitJustPressed.process();
     }
 }

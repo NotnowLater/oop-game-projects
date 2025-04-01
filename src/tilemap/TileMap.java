@@ -12,12 +12,10 @@ public class TileMap {
     private int height;
 
     public TileMap(int width, int height, String dataPath){
-        try {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream(dataPath)))){
             this.setWidth(width);
             this.setHeight(height);
             setTileData(new int[height][width]);
-            InputStream is = getClass().getClassLoader().getResourceAsStream(dataPath);
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
             String line;
             int lineCount = 0;
             while ((line = br.readLine()) != null){
@@ -25,8 +23,6 @@ public class TileMap {
                 getTileData()[lineCount] = toAdd.clone();
                 lineCount++;
             }
-            br.close();
-            is.close();
         } catch (Exception e){
             e.printStackTrace();
         }
